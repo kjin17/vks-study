@@ -25,8 +25,9 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; background: #26283f; font-family: var(--font-sans); }
 
-  .stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
-  .deck { position: relative; width: 1280px; height: 720px; transform-origin: center; }
+  .stage { position: fixed; inset: 0; overflow: hidden; }
+  .deck { position: absolute; left: 50%; top: 50%; margin-left: -640px; margin-top: -360px;
+    width: 1280px; height: 720px; transform-origin: center; }
 
   .slide {
     position: absolute; inset: 0; width: 1280px; height: 720px;
@@ -718,7 +719,10 @@ image: <span class="str">depot-image-proxy.kube-system<br>&nbsp;&nbsp;.svc.clust
 
   function fit() {
     var deck = document.getElementById('deck');
-    var s = Math.min(window.innerWidth / 1280, window.innerHeight / 720) * 0.96;
+    var de = document.documentElement;
+    var w = de.clientWidth || window.innerWidth;
+    var h = de.clientHeight || window.innerHeight;
+    var s = Math.min(w / 1280, h / 720) * 0.96;
     deck.style.transform = 'scale(' + s + ')';
   }
   window.addEventListener('resize', fit);
