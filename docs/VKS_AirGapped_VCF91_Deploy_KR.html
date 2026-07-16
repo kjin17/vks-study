@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VKS 에어갭 배포 가이드 — VCF 9.1.0</title>
+<style>
+  :root {
+    --vmw-navy: #1B1E35;
+    --vmw-white: #FFFFFF;
+    --vmw-gray: #F2F2F2;
+    --vmw-teal: #007A86;
+    --vmw-blue: #005B84;
+    --vmw-sky: #0193C2;
+    --vmw-green: #61A00A;
+    --vmw-plum: #6C4B8F;
+    --vmw-gold: #EDB516;
+    --vmw-link: #E18629;
+    --grad-leaf: linear-gradient(135deg, #61A00A 0%, #007A86 100%);
+    --grad-aqua: linear-gradient(135deg, #0193C2 0%, #005B84 100%);
+    --grad-plum: linear-gradient(135deg, #6C4B8F 0%, #005B84 100%);
+    --font-sans: Arial, "Helvetica Neue", Helvetica, Roboto, sans-serif;
+    --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: #26283f; font-family: var(--font-sans); }
+
+  .stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .deck { position: relative; width: 1280px; height: 720px; transform-origin: center; }
+
+  .slide {
+    position: absolute; inset: 0; width: 1280px; height: 720px;
+    background: var(--vmw-white); color: var(--vmw-navy);
+    display: none; overflow: hidden;
+  }
+  .slide.active { display: block; }
+
+  /* ---------- shared chrome ---------- */
+  .footer {
+    position: absolute; left: 64px; right: 64px; bottom: 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px; color: #8a8d9c; letter-spacing: .01em;
+  }
+  .brand-mark { font-size: 13px; font-weight: 700; color: var(--vmw-navy); letter-spacing: -.01em; }
+  .brand-mark span { font-weight: 400; color: #6a6e80; }
+  .page-no { font-size: 11px; color: #8a8d9c; }
+
+  .eyebrow {
+    display: inline-block; font-size: 14px; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--vmw-teal); margin-bottom: 18px;
+  }
+  .swoosh { position: absolute; pointer-events: none; }
+
+  /* ---------- L1: Title ---------- */
+  .l-title .title-block { position: absolute; left: 560px; right: 72px; top: 176px; }
+  .l-title h1 { font-size: 44px; line-height: 1.16; font-weight: 700; letter-spacing: -.015em; color: var(--vmw-navy); }
+  .l-title .rule { width: 100%; height: 2px; background: var(--vmw-sky); margin: 24px 0; }
+  .l-title .subtitle { font-size: 19px; color: #4b4f63; line-height: 1.45; }
+  .l-title .meta { position: absolute; left: 560px; top: 520px; font-size: 13px; color: #6a6e80; line-height: 1.7; }
+  .l-title .meta b { color: var(--vmw-navy); }
+
+  /* ---------- L2: Agenda ---------- */
+  .l-agenda .head { position: absolute; left: 64px; top: 60px; right: 64px; }
+  .l-agenda h2 { font-size: 36px; font-weight: 700; letter-spacing: -.01em; }
+  .l-agenda .head .bar { width: 64px; height: 4px; background: var(--grad-leaf); margin-top: 16px; border-radius: 2px; }
+  .l-agenda ol { position: absolute; left: 64px; right: 64px; top: 176px; bottom: 78px;
+    display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; row-gap: 4px; list-style: none;
+    grid-auto-rows: min-content; }
+  .l-agenda li { display: flex; gap: 18px; padding: 14px 0; border-bottom: 1px solid #e3e5ec; align-items: baseline; }
+  .l-agenda .num { font-size: 20px; font-weight: 700; color: var(--vmw-teal); min-width: 34px; }
+  .l-agenda .item-title { font-size: 18px; font-weight: 700; }
+  .l-agenda .item-sub { font-size: 12.5px; color: #6a6e80; margin-top: 3px; }
+
+  /* ---------- L3: Section ---------- */
+  .l-section .sec-num { position: absolute; left: 64px; top: 190px; font-size: 20px; font-weight: 700; color: var(--vmw-teal); letter-spacing: .2em; }
+  .l-section h2 { position: absolute; left: 64px; top: 240px; width: 640px; font-size: 50px; line-height: 1.12; font-weight: 700; letter-spacing: -.015em; }
+  .l-section .sec-sub { position: absolute; left: 64px; top: 460px; width: 580px; font-size: 18px; color: #4b4f63; line-height: 1.5; }
+
+  /* ---------- L4: Content ---------- */
+  .l-content .head, .l-two .head, .l-data .head, .l-flow .head, .l-steps .head {
+    position: absolute; left: 64px; top: 52px; right: 64px; padding-bottom: 18px; border-bottom: 2px solid var(--vmw-teal);
+  }
+  .l-content h2, .l-two h2, .l-data h2, .l-flow h2, .l-steps h2 { font-size: 29px; font-weight: 700; letter-spacing: -.01em; }
+  .l-content .head .sub, .l-two .head .sub, .l-data .head .sub, .l-flow .head .sub, .l-steps .head .sub { font-size: 14px; color: #6a6e80; margin-top: 7px; }
+  .l-content .body { position: absolute; left: 64px; right: 64px; top: 164px; bottom: 76px; }
+  .l-content ul { list-style: none; }
+  .l-content ul li { position: relative; padding: 9px 0 9px 28px; font-size: 18px; line-height: 1.45; color: #2c3047; }
+  .l-content ul li::before { content: ""; position: absolute; left: 0; top: 18px; width: 11px; height: 11px; border-radius: 3px; background: var(--grad-leaf); }
+  .l-content ul li b { color: var(--vmw-navy); }
+  .l-content ul ul li { font-size: 15px; color: #4b4f63; padding: 5px 0 5px 24px; }
+  .l-content ul ul li::before { width: 7px; height: 7px; top: 13px; border-radius: 50%; background: var(--vmw-sky); }
+
+  /* ---------- L5: Two-column ---------- */
+  .l-two .cols { position: absolute; left: 64px; right: 64px; top: 164px; bottom: 76px; display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+  .card { background: var(--vmw-gray); border-radius: 14px; padding: 24px 28px; }
+  .card .card-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--vmw-white); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px; }
+  .card.leaf .card-tag { background: var(--grad-leaf); }
+  .card.aqua .card-tag { background: var(--grad-aqua); }
+  .card.plum .card-tag { background: var(--grad-plum); }
+  .card h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+  .card p, .card li { font-size: 14.5px; line-height: 1.5; color: #4b4f63; }
+  .card ul { list-style: none; margin-top: 4px; }
+  .card ul li { padding: 4px 0 4px 18px; position: relative; }
+  .card ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 7px; height: 7px; border-radius: 50%; background: var(--vmw-teal); }
+  .card ul li b { color: var(--vmw-navy); }
+
+  /* ---------- L6: Data ---------- */
+  .l-data .metrics { position: absolute; left: 64px; right: 64px; top: 176px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .metric { border: 1px solid #e3e5ec; border-radius: 14px; padding: 22px 26px; }
+  .metric .big { font-size: 42px; font-weight: 700; letter-spacing: -.02em; }
+  .metric.leaf .big { color: var(--vmw-green); }
+  .metric.aqua .big { color: var(--vmw-teal); }
+  .metric.plum .big { color: var(--vmw-plum); }
+  .metric .label { font-size: 14px; font-weight: 700; margin-top: 6px; }
+  .metric .desc { font-size: 12.5px; color: #6a6e80; margin-top: 5px; line-height: 1.45; }
+  .l-data table { position: absolute; left: 64px; right: 64px; top: 388px; width: calc(100% - 128px); border-collapse: collapse; font-size: 14px; }
+  .l-data th { text-align: left; padding: 11px 16px; background: var(--vmw-navy); color: var(--vmw-white); font-weight: 700; }
+  .l-data th:first-child { border-radius: 8px 0 0 8px; }
+  .l-data th:last-child { border-radius: 0 8px 8px 0; }
+  .l-data td { padding: 10px 16px; border-bottom: 1px solid #e3e5ec; color: #2c3047; }
+  .l-data td b { color: var(--vmw-teal); }
+  .mono { font-family: var(--font-mono); font-size: 13px; }
+
+  /* ---------- L8: Big ---------- */
+  .l-big { background: var(--vmw-navy); color: var(--vmw-white); }
+  .l-big .statement { position: absolute; left: 90px; right: 90px; top: 232px; font-size: 50px; line-height: 1.2; font-weight: 700; letter-spacing: -.015em; }
+  .l-big .statement em { font-style: normal; background: var(--grad-leaf); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .l-big .eyebrow { color: #7dd0d8; }
+  .l-big .footer { color: #6d7188; }
+  .l-big .brand-mark { color: var(--vmw-white); }
+  .l-big .brand-mark span { color: #9ba0b8; }
+
+  /* ---------- L9: Thanks ---------- */
+  .l-thanks h2 { position: absolute; left: 90px; top: 250px; font-size: 66px; font-weight: 700; letter-spacing: -.02em; }
+  .l-thanks .contact { position: absolute; left: 90px; top: 392px; font-size: 16px; line-height: 1.8; color: #4b4f63; width: 560px; }
+  .l-thanks .contact b { color: var(--vmw-navy); }
+  .l-thanks .contact a { color: var(--vmw-link); text-decoration: none; word-break: break-all; }
+
+  /* ---------- code blocks ---------- */
+  .code { background: var(--vmw-navy); border-radius: 10px; padding: 14px 18px;
+    font-family: var(--font-mono); font-size: 13px; line-height: 1.65; color: #dfe2ef; }
+  .code .c { color: #7a80a0; }         /* comment */
+  .code .cmd { color: #8ad35a; }        /* command keyword */
+  .code .arg { color: #5ec7e0; }        /* flag / arg */
+  .code .str { color: #edb516; }        /* value / string */
+  .code .pr { color: #61A00A; font-weight: 700; }  /* prompt $ */
+
+  /* ---------- callout ---------- */
+  .callout { display: flex; gap: 12px; align-items: flex-start; border-radius: 12px;
+    padding: 14px 18px; font-size: 14px; line-height: 1.5; }
+  .callout .ico { flex: none; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #fff; }
+  .callout.warn { background: #fdf6e3; border: 1px solid #f0d98a; color: #6b5713; }
+  .callout.warn .ico { background: var(--vmw-gold); color: var(--vmw-navy); }
+  .callout.warn b { color: #7a5a00; }
+  .callout.tip { background: #eaf5f6; border: 1px solid #b9dde0; color: #234b4f; }
+  .callout.tip .ico { background: var(--vmw-teal); }
+  .callout.tip b { color: var(--vmw-teal); }
+
+  /* ---------- FLOW diagram ---------- */
+  .l-flow .flow { position: absolute; left: 64px; right: 64px; top: 210px;
+    display: flex; align-items: stretch; gap: 0; }
+  .fnode { flex: 1 1 0; border-radius: 14px; background: var(--vmw-gray); border: 1px solid #e3e5ec;
+    padding: 18px 14px 16px; text-align: center; position: relative; min-height: 168px; display: flex; flex-direction: column; }
+  .fnode .bar { position: absolute; left: 0; right: 0; top: 0; height: 6px; border-radius: 14px 14px 0 0; }
+  .fnode.n1 .bar { background: #9aa0b4; }
+  .fnode.n2 .bar { background: var(--grad-aqua); }
+  .fnode.n3 .bar { background: var(--grad-leaf); }
+  .fnode.n4 .bar { background: var(--grad-aqua); }
+  .fnode.n5 .bar { background: var(--grad-plum); }
+  .fnode .ficon { font-size: 26px; margin: 8px 0 10px; line-height: 1; }
+  .fnode .ftitle { font-size: 16px; font-weight: 700; color: var(--vmw-navy); }
+  .fnode .fkr { font-size: 12px; color: #6a6e80; margin-top: 2px; }
+  .fnode .fdesc { font-size: 12px; color: #4b4f63; margin-top: 10px; line-height: 1.45; }
+  .farrow { flex: 0 0 44px; display: flex; align-items: center; justify-content: center; color: var(--vmw-teal); font-size: 26px; font-weight: 700; }
+  .fgap { flex: 0 0 62px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .fgap::before { content: ""; position: absolute; top: -14px; bottom: -14px; left: 50%; border-left: 2px dashed var(--vmw-gold); }
+  .fgap .glabel { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+    font-size: 11px; font-weight: 700; color: #9a7a00; background: #fdf6e3; border: 1px solid #f0d98a; padding: 4px 10px; border-radius: 999px; }
+  .fgap .garrow { color: var(--vmw-gold); font-size: 24px; font-weight: 700; z-index: 1; background: #fff; padding: 0 2px; }
+  .l-flow .flowcap { position: absolute; left: 64px; right: 64px; top: 470px;
+    font-size: 15px; color: #4b4f63; line-height: 1.6; }
+  .l-flow .flowcap b { color: var(--vmw-teal); }
+  .l-flow .flowcap .oneway { font-weight: 700; color: var(--vmw-navy); }
+
+  /* ---------- STEPS overview ---------- */
+  .l-steps .grid { position: absolute; left: 64px; right: 64px; top: 172px; bottom: 76px;
+    display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 1fr 1fr; gap: 18px; }
+  .step { border: 1px solid #e3e5ec; border-radius: 13px; padding: 16px 18px; position: relative; overflow: hidden; }
+  .step .sn { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+  .step .st { font-size: 15.5px; font-weight: 700; color: var(--vmw-navy); margin-top: 8px; }
+  .step .sd { font-size: 12px; color: #6a6e80; margin-top: 6px; line-height: 1.45; }
+  .step .host { position: absolute; top: 16px; right: 16px; font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+  .step.p-dl .sn { color: var(--vmw-sky); }   .step.p-dl .host { background: #e3f2f6; color: var(--vmw-blue); }
+  .step.p-sup .sn { color: var(--vmw-teal); } .step.p-sup .host { background: #e0f0e0; color: var(--vmw-green); }
+  .step.p-adm .sn { color: var(--vmw-plum); } .step.p-adm .host { background: #efe8f5; color: var(--vmw-plum); }
+  .step.p-dep .sn { color: var(--vmw-gold); } .step.p-dep .host { background: #fdf6e3; color: #9a7a00; }
+
+  /* step detail slides reuse l-content .body split */
+  .split { position: absolute; left: 64px; right: 64px; top: 164px; bottom: 76px;
+    display: grid; grid-template-columns: 0.92fr 1.08fr; gap: 34px; align-items: start; }
+  .split .lead { list-style: none; }
+  .split .lead li { position: relative; padding: 8px 0 8px 26px; font-size: 16px; line-height: 1.45; color: #2c3047; }
+  .split .lead li::before { content: ""; position: absolute; left: 0; top: 15px; width: 10px; height: 10px; border-radius: 3px; background: var(--grad-leaf); }
+  .split .lead li b { color: var(--vmw-navy); }
+  .split .codeblk { display: flex; flex-direction: column; gap: 12px; }
+  .codelabel { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--vmw-teal); margin-bottom: -4px; }
+
+  /* ---------- navigation ---------- */
+  .nav {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 14px; z-index: 50;
+    background: rgba(27,30,53,.82); border-radius: 999px; padding: 8px 16px; backdrop-filter: blur(6px);
+  }
+  .nav button { border: 0; background: transparent; color: #fff; font-size: 16px; cursor: pointer;
+    width: 30px; height: 30px; border-radius: 50%; font-family: var(--font-sans); }
+  .nav button:hover { background: rgba(255,255,255,.15); }
+  .dots { display: flex; gap: 6px; flex-wrap: wrap; max-width: 520px; justify-content: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.3); cursor: pointer; transition: all .18s; }
+  .dot.on { background: #fff; width: 20px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="deck" id="deck">
+
+    <!-- 1 · Title -->
+    <section class="slide l-title active" data-screen-label="01 Title">
+      <svg class="swoosh" style="left:0;top:0" width="560" height="720" viewBox="0 0 560 720" fill="none">
+        <defs>
+          <linearGradient id="gLeaf" x1="0" y1="720" x2="560" y2="0" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/>
+          </linearGradient>
+        </defs>
+        <path d="M0 0 H560 C 380 60 300 180 300 380 C 300 560 220 680 0 720 Z" fill="url(#gLeaf)"/>
+        <path d="M560 14 C 388 76 316 192 316 380 C 316 556 240 672 40 720" stroke="#0193C2" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="title-block">
+        <div class="eyebrow">VCF 9.1.0 · Deployment Guide</div>
+        <h1>VKS 에어갭(Air-Gapped)<br>배포 가이드</h1>
+        <div class="rule"></div>
+        <div class="subtitle">인터넷 차단 환경에서 vSphere Kubernetes Service 클러스터를 배포하는 절차 — 내장 Software Depot(OCI 레지스트리) 기반</div>
+      </div>
+      <div class="meta">
+        <b>대상</b> · VCF / VKS 플랫폼·운영 엔지니어<br>
+        기준 릴리스 : VMware Cloud Foundation 9.1.0
+      </div>
+      <div class="footer">
+        <div>Broadcom Proprietary and Confidential. Copyright © 2025 Broadcom. All Rights Reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.</div>
+        <div class="brand-mark">VMware <span>by Broadcom</span></div>
+      </div>
+    </section>
+
+    <!-- 2 · Agenda -->
+    <section class="slide l-agenda" data-screen-label="02 Agenda">
+      <div class="head"><h2>목차</h2><div class="bar"></div></div>
+      <ol>
+        <li><span class="num">01</span><span><span class="item-title">개요</span><div class="item-sub">에어갭 배포란 무엇이며 왜 필요한가</div></span></li>
+        <li><span class="num">02</span><span><span class="item-title">데이터 흐름</span><div class="item-sub">인터넷 → Bastion → Admin → Depot → Supervisor</div></span></li>
+        <li><span class="num">03</span><span><span class="item-title">핵심 용어</span><div class="item-sub">Bastion·Admin·VCF CLI·Software Depot</div></span></li>
+        <li><span class="num">04</span><span><span class="item-title">전제 조건 &amp; 검증 BOM</span><div class="item-sub">지원 릴리스·필수 도구·버전 조합</div></span></li>
+        <li><span class="num">05</span><span><span class="item-title">8단계 배포 절차</span><div class="item-sub">다운로드부터 클러스터 배포까지</div></span></li>
+        <li><span class="num">06</span><span><span class="item-title">운영 포인트 &amp; 요약</span><div class="item-sub">보안·순서·프록시 핵심 정리</div></span></li>
+      </ol>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">2</div></div>
+    </section>
+
+    <!-- 3 · Section 01 – Leaf -->
+    <section class="slide l-section" data-screen-label="03 Section-개요">
+      <svg class="swoosh" style="right:0;top:0;left:auto" width="480" height="720" viewBox="0 0 480 720" fill="none">
+        <defs><linearGradient id="gLeaf2" x1="480" y1="0" x2="0" y2="720" gradientUnits="userSpaceOnUse"><stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/></linearGradient></defs>
+        <path d="M480 0 V720 H120 C 300 640 360 520 360 360 C 360 200 300 80 200 0 Z" fill="url(#gLeaf2)"/>
+        <path d="M186 0 C 288 84 346 202 346 360 C 346 522 286 644 100 720" stroke="#0193C2" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="sec-num">SECTION 01</div>
+      <h2>개요</h2>
+      <div class="sec-sub">인터넷에 연결되지 않은 격리 환경에서 VKS 클러스터를 배포하기 위한 전체 접근 방식을 설명합니다.</div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">3</div></div>
+    </section>
+
+    <!-- 4 · Content: 개요 -->
+    <section class="slide l-content" data-screen-label="04 개요">
+      <div class="head"><h2>에어갭 환경의 VKS 배포란</h2><div class="sub">외부 인터넷 접근 없이, 필요한 아티팩트를 내부로 옮겨 배포하는 방식</div></div>
+      <div class="body">
+        <ul>
+          <li><b>문제</b> — VKS는 OVA·컨테이너 이미지·패키지 등 다수 아티팩트를 온라인 저장소에서 받아온다. 보안·규제상 인터넷이 차단된 환경에서는 이 경로가 막힌다.</li>
+          <li><b>접근 방식</b> — 인터넷에 연결된 <b>Bastion 호스트</b>에서 모든 아티팩트를 내려받아, 격리망 내부의 <b>Admin 호스트</b>로 물리적으로 복사한 뒤, VCF 내장 <b>Software Depot</b>에 업로드하여 Supervisor / VKS가 이를 소비하도록 한다.</li>
+          <li><b>9.1.0의 핵심 개선</b> — VCF 9.1.0에는 <b>OCI 레지스트리가 내장</b>되어, 이전 릴리스에서 필요하던 별도의 외부 OCI 레지스트리 구축이 <b>불필요</b>해졌다.
+            <ul>
+              <li>이전 릴리스는 외부 OCI 레지스트리 + 레거시 가이드 경로를 따라야 한다</li>
+              <li>본 가이드는 <b>VCF / VVF 9.1.0 전용</b></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">4</div></div>
+    </section>
+
+    <!-- 5 · FLOW diagram -->
+    <section class="slide l-flow" data-screen-label="05 데이터 흐름">
+      <div class="head"><h2>데이터 흐름 — 아티팩트 이동 경로</h2><div class="sub">한 방향(one-way)으로만 흐른다 · 에어갭 경계는 물리적 파일 복사로만 통과</div></div>
+      <div class="flow">
+        <div class="fnode n1">
+          <div class="bar"></div><div class="ficon">🌐</div>
+          <div class="ftitle">인터넷</div><div class="fkr">Public Sources</div>
+          <div class="fdesc">Broadcom Support Portal · wp-content.broadcom.com</div>
+        </div>
+        <div class="farrow">→</div>
+        <div class="fnode n2">
+          <div class="bar"></div><div class="ficon">⬇️</div>
+          <div class="ftitle">Bastion 호스트</div><div class="fkr">다운로드 담당</div>
+          <div class="fdesc">인터넷 연결 Linux VM<br>모든 아티팩트 수집</div>
+        </div>
+        <div class="fgap"><div class="glabel">에어갭 경계 · 파일 복사</div><div class="garrow">⇢</div></div>
+        <div class="fnode n3">
+          <div class="bar"></div><div class="ficon">🖥️</div>
+          <div class="ftitle">Admin 호스트</div><div class="fkr">배포 컨트롤 센터</div>
+          <div class="fdesc">격리망 내부 Linux VM<br>kubectl · VCF CLI 실행</div>
+        </div>
+        <div class="farrow">→</div>
+        <div class="fnode n4">
+          <div class="bar"></div><div class="ficon">📦</div>
+          <div class="ftitle">Software Depot</div><div class="fkr">내장 OCI 레지스트리</div>
+          <div class="fdesc">VCF 9.1.0 내장<br>아티팩트 업로드 대상</div>
+        </div>
+        <div class="farrow">→</div>
+        <div class="fnode n5">
+          <div class="bar"></div><div class="ficon">☸️</div>
+          <div class="ftitle">Supervisor / VKS</div><div class="fkr">배포·소비</div>
+          <div class="fdesc">Depot에서 이미지·패키지 소비<br>워크로드 클러스터 생성</div>
+        </div>
+      </div>
+      <div class="flowcap">
+        <span class="oneway">이동 순서 :</span> 인터넷 → Bastion(다운로드) → <b>에어갭 경계</b>(물리적 파일 복사) → Admin(컨트롤) → Software Depot(업로드) → Supervisor/VKS(소비).
+        경계를 넘는 트래픽은 없으며, 오직 다운로드한 파일 뭉치만 반입된다.
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">5</div></div>
+    </section>
+
+    <!-- 6 · Two-column: 용어 (part 1) -->
+    <section class="slide l-two" data-screen-label="06 용어 1">
+      <div class="head"><h2>핵심 용어 (1/2) — 호스트</h2><div class="sub">배포에 참여하는 두 개의 리눅스 VM 역할</div></div>
+      <div class="cols">
+        <div class="card leaf">
+          <span class="card-tag">Internet-facing</span>
+          <h3>Bastion 호스트</h3>
+          <ul>
+            <li><b>인터넷 연결</b> Linux VM</li>
+            <li>OVA·CLI·이미지·패키지 등 <b>모든 아티팩트 다운로드</b> 담당</li>
+            <li>다운로드한 파일을 Admin 호스트로 반출(복사)</li>
+          </ul>
+        </div>
+        <div class="card aqua">
+          <span class="card-tag">Air-Gapped</span>
+          <h3>Admin 호스트</h3>
+          <ul>
+            <li>에어갭 <b>내부의 격리된</b> Linux VM</li>
+            <li><b>배포 컨트롤 센터</b> — kubectl / VCF CLI 실행 지점</li>
+            <li>권장 사양 : <b>2 vCPU · 4GB RAM · 150~200GB</b> 여유 스토리지</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">6</div></div>
+    </section>
+
+    <!-- 7 · Two-column: 용어 (part 2) -->
+    <section class="slide l-two" data-screen-label="07 용어 2">
+      <div class="head"><h2>핵심 용어 (2/2) — 소프트웨어</h2><div class="sub">배포에 사용되는 도구와 저장소</div></div>
+      <div class="cols">
+        <div class="card leaf" style="padding-top:20px">
+          <span class="card-tag">CLI</span>
+          <h3>VCF CLI</h3>
+          <ul>
+            <li>플러그인 기반 통합 CLI</li>
+            <li>구 <b>kubectl-vsphere</b>를 대체</li>
+            <li><b>vcf context</b> 명령으로 로그인·컨텍스트 관리</li>
+          </ul>
+        </div>
+        <div class="card aqua" style="padding-top:20px">
+          <span class="card-tag">Registry</span>
+          <h3>Software Depot</h3>
+          <ul>
+            <li>VCF 9.1.0 <b>내장 OCI 레지스트리</b></li>
+            <li>외부 레지스트리 <b>불필요</b> — 9.1.0의 핵심 개선</li>
+            <li>Supervisor Services·Standard Packages 업로드 대상</li>
+          </ul>
+        </div>
+        <div class="card plum" style="grid-column: 1 / -1; padding:18px 28px;">
+          <span class="card-tag">Add-ons</span>
+          <h3 style="margin-bottom:6px">VKS Standard Packages</h3>
+          <p><b>cert-manager, Prometheus</b> 등 검증된 애드온 번들. <span class="mono">vcf addon install</span> 명령으로 워크로드 클러스터에 설치한다.</p>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">7</div></div>
+    </section>
+
+    <!-- 8 · Section 02 – Aqua -->
+    <section class="slide l-section" data-screen-label="08 Section-전제조건">
+      <svg class="swoosh" style="right:0;top:0;left:auto" width="480" height="720" viewBox="0 0 480 720" fill="none">
+        <defs><linearGradient id="gAqua" x1="480" y1="0" x2="0" y2="720" gradientUnits="userSpaceOnUse"><stop stop-color="#0193C2"/><stop offset="1" stop-color="#005B84"/></linearGradient></defs>
+        <path d="M480 0 V720 H120 C 300 640 360 520 360 360 C 360 200 300 80 200 0 Z" fill="url(#gAqua)"/>
+        <path d="M186 0 C 288 84 346 202 346 360 C 346 522 286 644 100 720" stroke="#61A00A" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="sec-num">SECTION 02</div>
+      <h2>전제 조건<br>&amp; 검증 BOM</h2>
+      <div class="sec-sub">시작 전에 반드시 갖춰야 할 릴리스·도구·버전 조합.</div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">8</div></div>
+    </section>
+
+    <!-- 9 · Content: 전제조건 & 도구 -->
+    <section class="slide l-content" data-screen-label="09 전제조건">
+      <div class="head"><h2>전제 조건 &amp; 필수 도구</h2><div class="sub">Admin / Bastion 호스트에 준비해야 할 것</div></div>
+      <div class="body">
+        <ul>
+          <li><b>릴리스</b> — 본 가이드는 <b>VCF / VVF 9.1.0 전용</b>이다. 이전 릴리스는 외부 OCI 레지스트리 + 레거시 가이드를 따른다.</li>
+          <li><b>OS</b> — 검증 기준 <b>Ubuntu 24.04.4</b></li>
+          <li><b>필수 도구</b> — 다음이 설치되어 있어야 한다 :
+            <ul><li><span class="mono">wget · curl · docker · jq · yq · openssl · imgpkg · python3</span></li></ul>
+          </li>
+          <li><b>Admin 호스트 사양</b> — 2 vCPU · 4GB RAM · <b>150~200GB</b> 여유 스토리지(아티팩트 임시 보관 공간 포함)</li>
+        </ul>
+        <div class="callout tip" style="margin-top:18px">
+          <span class="ico">i</span>
+          <div><b>왜 이 조합인가</b> — 아래 “검증 BOM”은 Broadcom이 상호 호환성을 검증한 버전 세트다. 임의 조합보다 검증된 조합을 우선한다.</div>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">9</div></div>
+    </section>
+
+    <!-- 10 · Data: BOM -->
+    <section class="slide l-data" data-screen-label="10 검증 BOM">
+      <div class="head"><h2>검증된 BOM(Bill of Materials) 조합</h2><div class="sub">이 문서 기준으로 상호 검증된 버전 세트 — 이 조합을 준수할 것</div></div>
+      <div class="metrics">
+        <div class="metric aqua"><div class="big">9.1.0</div><div class="label">vCenter</div><div class="desc">기준 플랫폼 릴리스</div></div>
+        <div class="metric leaf"><div class="big">3.6.3</div><div class="label">VKS</div><div class="desc">vSphere Kubernetes Service</div></div>
+        <div class="metric plum"><div class="big">1.34.2</div><div class="label">Kubernetes (VKr)</div><div class="desc">K8s Release OVA 기본 버전</div></div>
+      </div>
+      <table>
+        <thead><tr><th>구성요소</th><th>검증 버전</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>Standard Packages</td><td><b>3.6.0-20260211</b></td><td>cert-manager·Prometheus 등 애드온 번들 (tar)</td></tr>
+          <tr><td>VCF CLI</td><td><b>9.1.0</b></td><td>Broadcom Support Portal에서 다운로드</td></tr>
+          <tr><td>OS</td><td><b>Ubuntu 24.04.4</b></td><td>Bastion / Admin 호스트 공통</td></tr>
+        </tbody>
+      </table>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">10</div></div>
+    </section>
+
+    <!-- 11 · Section 03 – Plum -->
+    <section class="slide l-section" data-screen-label="11 Section-절차">
+      <svg class="swoosh" style="right:0;top:0;left:auto" width="480" height="720" viewBox="0 0 480 720" fill="none">
+        <defs><linearGradient id="gPlum" x1="480" y1="0" x2="0" y2="720" gradientUnits="userSpaceOnUse"><stop stop-color="#6C4B8F"/><stop offset="1" stop-color="#005B84"/></linearGradient></defs>
+        <path d="M480 0 V720 H120 C 300 640 360 520 360 360 C 360 200 300 80 200 0 Z" fill="url(#gPlum)"/>
+        <path d="M186 0 C 288 84 346 202 346 360 C 346 522 286 644 100 720" stroke="#EDB516" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="sec-num">SECTION 03</div>
+      <h2>8단계<br>배포 절차</h2>
+      <div class="sec-sub">다운로드부터 워크로드 클러스터 배포까지의 전체 흐름.</div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">11</div></div>
+    </section>
+
+    <!-- 12 · STEPS overview -->
+    <section class="slide l-steps" data-screen-label="12 8단계 오버뷰">
+      <div class="head"><h2>8단계 절차 한눈에 보기</h2><div class="sub">색상은 수행 위치를 뜻함 · <span style="color:var(--vmw-blue)">Bastion</span> / <span style="color:var(--vmw-green)">vCenter</span> / <span style="color:var(--vmw-plum)">Admin</span> / <span style="color:#9a7a00">Depot</span></div></div>
+      <div class="grid">
+        <div class="step p-dl"><span class="host">Bastion</span><div class="sn">1</div><div class="st">다운로드</div><div class="sd">OVA · VCF CLI · Supervisor Services · Standard Packages 수집</div></div>
+        <div class="step p-sup"><span class="host">vCenter</span><div class="sn">2</div><div class="st">Supervisor 활성화</div><div class="sd">네트워킹·스토리지 정책 구성 후 활성화</div></div>
+        <div class="step p-sup"><span class="host">vCenter</span><div class="sn">3</div><div class="st">Content Library</div><div class="sd">로컬 라이브러리 생성 + K8s Release OVA 업로드</div></div>
+        <div class="step p-sup"><span class="host">vCenter</span><div class="sn">4</div><div class="st">Namespace 생성</div><div class="sd">vSphere Namespace 생성 (예: ns01)</div></div>
+        <div class="step p-adm"><span class="host">Admin</span><div class="sn">5</div><div class="st">Admin 호스트 구성</div><div class="sd">kubectl · CA 등록 · vcf context 로그인 · OCI 업로드 enable</div></div>
+        <div class="step p-dep"><span class="host">Depot</span><div class="sn">6</div><div class="st">Depot 업로드</div><div class="sd">Services·Packages 업로드 후 반드시 disable ⚠️</div></div>
+        <div class="step p-adm"><span class="host">Admin</span><div class="sn">7</div><div class="st">Harbor 구성</div><div class="sd">이미지 프록시 구성 + YAML 경로 수정 후 설치</div></div>
+        <div class="step p-adm"><span class="host">Admin</span><div class="sn">8</div><div class="st">VKS 클러스터 배포</div><div class="sd">클러스터 생성 + Standard Packages 애드온 설치</div></div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">12</div></div>
+    </section>
+
+    <!-- 13 · Step 1 detail -->
+    <section class="slide l-content" data-screen-label="13 Step1 다운로드">
+      <div class="head"><h2>Step 1 — 다운로드 <span style="font-size:15px;color:var(--vmw-blue);font-weight:700">@ Bastion</span></h2><div class="sub">인터넷 연결 Bastion에서 네 종류의 아티팩트를 수집한다</div></div>
+      <div class="split">
+        <ul class="lead">
+          <li><b>① K8s Release OVA</b> — wp-content.broadcom.com, v1.34.2 기본. <b>최신 3개 버전</b> 확보 권장</li>
+          <li><b>② VCF CLI 9.1.0</b> — Broadcom Support Portal</li>
+          <li><b>③ Supervisor Services</b> — 이미지 + YAML (예: ArgoCD v1.1.0)</li>
+          <li><b>④ VKS Standard Packages</b> — tar (3.6.0-20260211)</li>
+        </ul>
+        <div class="codeblk">
+          <div class="codelabel">Supervisor Services 다운로드</div>
+          <div class="code">
+<span class="c"># 이미지 + YAML 을 로컬로 내려받기</span><br>
+<span class="pr">$</span> <span class="cmd">python3</span> oci_image_depot_migrator.py <span class="cmd">download</span> \<br>
+&nbsp;&nbsp;<span class="arg">--service</span> <span class="str">argocd</span> <span class="arg">--version</span> <span class="str">v1.1.0</span>
+          </div>
+          <div class="codelabel">Standard Packages tar</div>
+          <div class="code">
+<span class="pr">$</span> <span class="cmd">wget</span> <span class="str">https://.../standard-packages-3.6.0-20260211.tar</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">13</div></div>
+    </section>
+
+    <!-- 14 · Steps 2-4 -->
+    <section class="slide l-content" data-screen-label="14 Step2-4">
+      <div class="head"><h2>Step 2–4 — Supervisor · Content Library · Namespace <span style="font-size:15px;color:var(--vmw-green);font-weight:700">@ vCenter</span></h2><div class="sub">vCenter 측 사전 구성 세 단계</div></div>
+      <div class="body">
+        <ul>
+          <li><b>Step 2 · Supervisor 활성화</b> — 네트워킹·스토리지 정책을 먼저 구성한 뒤 vCenter에서 Supervisor를 활성화한다.</li>
+          <li><b>Step 3 · 로컬 Content Library 생성</b> — 로컬(비게시) Content Library를 만들고 다운로드한 <b>K8s Release OVA를 업로드</b>한다. 이 라이브러리가 클러스터 노드 이미지 소스가 된다.</li>
+          <li><b>Step 4 · vSphere Namespace 생성</b> — 워크로드 클러스터가 위치할 네임스페이스를 생성한다 (예: <span class="mono">ns01</span>). 스토리지 정책·VM Class·권한을 이 네임스페이스에 연결한다.</li>
+        </ul>
+        <div class="callout tip" style="margin-top:16px">
+          <span class="ico">i</span>
+          <div>이 세 단계는 모두 <b>vCenter UI / Supervisor</b> 측 작업으로, 이후 Admin 호스트에서 진행할 CLI 작업의 전제 조건이 된다.</div>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">14</div></div>
+    </section>
+
+    <!-- 15 · Step 5 -->
+    <section class="slide l-content" data-screen-label="15 Step5 Admin구성">
+      <div class="head"><h2>Step 5 — Admin 호스트 구성 <span style="font-size:15px;color:var(--vmw-plum);font-weight:700">@ Admin</span></h2><div class="sub">격리망 내부 배포 컨트롤 센터 셋업</div></div>
+      <div class="split">
+        <ul class="lead">
+          <li><b>kubectl 설치</b> — Supervisor에서 <span class="mono">vsphere-plugin.zip</span> 획득</li>
+          <li><b>vCenter 루트 CA 등록</b> — TLS 신뢰 체인 구성</li>
+          <li><b>로그인</b> — <span class="mono">vcf context create / use</span></li>
+          <li><b>Depot OCI 업로드 활성화</b> — 이관을 위해 일시적으로 enable</li>
+        </ul>
+        <div class="codeblk">
+          <div class="codelabel">컨텍스트 생성 &amp; 전환</div>
+          <div class="code">
+<span class="pr">$</span> <span class="cmd">vcf</span> <span class="cmd">context</span> create <span class="arg">--name</span> <span class="str">airgap</span> \<br>
+&nbsp;&nbsp;<span class="arg">--endpoint</span> <span class="str">supervisor.vcf.local</span><br>
+<span class="pr">$</span> <span class="cmd">vcf</span> <span class="cmd">context</span> use <span class="str">airgap</span>
+          </div>
+          <div class="codelabel">Depot OCI 업로드 활성화</div>
+          <div class="code">
+<span class="pr">$</span> <span class="cmd">./toggle_software_depot_oci_image_upload.sh</span> <span class="str">enable</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">15</div></div>
+    </section>
+
+    <!-- 16 · Step 6 -->
+    <section class="slide l-content" data-screen-label="16 Step6 Depot업로드">
+      <div class="head"><h2>Step 6 — Depot 업로드 <span style="font-size:15px;color:#9a7a00;font-weight:700">@ Depot</span></h2><div class="sub">아티팩트를 내장 OCI 레지스트리로 이관</div></div>
+      <div class="split">
+        <ul class="lead">
+          <li><b>업로드 대상</b> — Supervisor Services + VKS Standard Packages</li>
+          <li><b>도구</b> — <span class="mono">oci_image_depot_migrator.py upload</span></li>
+          <li><b>완료 후 필수</b> — OCI 업로드를 <b>즉시 disable</b></li>
+        </ul>
+        <div class="codeblk">
+          <div class="codelabel">업로드 실행</div>
+          <div class="code">
+<span class="pr">$</span> <span class="cmd">python3</span> oci_image_depot_migrator.py <span class="cmd">upload</span> \<br>
+&nbsp;&nbsp;<span class="arg">--input</span> <span class="str">./argocd-v1.1.0</span><br>
+<span class="pr">$</span> <span class="cmd">python3</span> oci_image_depot_migrator.py <span class="cmd">upload</span> \<br>
+&nbsp;&nbsp;<span class="arg">--input</span> <span class="str">./standard-packages-3.6.0</span>
+          </div>
+          <div class="callout warn">
+            <span class="ico">!</span>
+            <div><b>보안 필수</b> — Depot OCI 업로드는 <b>무인증(unauthenticated)</b> 상태로 열린다. 이관이 끝나면 반드시 <span class="mono">disable</span> 하라.<br><span class="mono">./toggle_software_depot_oci_image_upload.sh disable</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">16</div></div>
+    </section>
+
+    <!-- 17 · Step 7 -->
+    <section class="slide l-content" data-screen-label="17 Step7 Harbor">
+      <div class="head"><h2>Step 7 — Harbor 구성 <span style="font-size:15px;color:var(--vmw-plum);font-weight:700">@ Admin</span></h2><div class="sub">VCF Automation이 없을 때 이미지 프록시로 Depot 경유</div></div>
+      <div class="split">
+        <ul class="lead">
+          <li><b>조건</b> — <b>VCF Automation 미사용</b> 시 관리 프록시를 구성한다</li>
+          <li><b>프록시 등록</b> — <span class="mono">manage-depot-image-proxy.sh add</span></li>
+          <li><b>YAML 수정</b> — Harbor 이미지 참조를 프록시 경유로 변경 후 설치</li>
+        </ul>
+        <div class="codeblk">
+          <div class="codelabel">이미지 프록시 등록</div>
+          <div class="code">
+<span class="pr">$</span> <span class="cmd">./manage-depot-image-proxy.sh</span> <span class="cmd">add</span>
+          </div>
+          <div class="codelabel">Harbor YAML 이미지 경로 (프록시 경유)</div>
+          <div class="code">
+<span class="c"># before</span><br>
+image: <span class="str">registry.example.com/harbor/...</span><br>
+<span class="c"># after — depot-image-proxy 경유</span><br>
+image: <span class="str">depot-image-proxy.kube-system<br>&nbsp;&nbsp;.svc.cluster.local/harbor/...</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">17</div></div>
+    </section>
+
+    <!-- 18 · Step 8 -->
+    <section class="slide l-content" data-screen-label="18 Step8 클러스터배포">
+      <div class="head"><h2>Step 8 — VKS 클러스터 배포 <span style="font-size:15px;color:var(--vmw-plum);font-weight:700">@ Admin</span></h2><div class="sub">워크로드 클러스터 생성 + Standard Packages 설치</div></div>
+      <div class="split">
+        <ul class="lead">
+          <li><b>VKS 업데이트</b> — VKS <b>3.6.3</b>으로 업데이트</li>
+          <li><b>클러스터 생성</b> — <span class="mono">vksConfig.yaml</span> 적용</li>
+          <li><b>애드온 설치</b> — <span class="mono">vcf addon install</span> (cert-manager 등)</li>
+          <li><b>실패 시</b> — privileged 라벨 부여 + ReplicaSet 삭제</li>
+        </ul>
+        <div class="codeblk">
+          <div class="codelabel">클러스터 생성 &amp; 애드온</div>
+          <div class="code">
+<span class="pr">$</span> <span class="cmd">kubectl</span> create <span class="arg">-f</span> <span class="str">vksConfig.yaml</span> <span class="arg">-n</span> <span class="str">ns01</span><br>
+<span class="pr">$</span> <span class="cmd">vcf</span> addon install create <span class="str">cert-manager</span>
+          </div>
+          <div class="codelabel">애드온 설치 실패 시 조치</div>
+          <div class="code">
+<span class="pr">$</span> <span class="cmd">kubectl</span> label ns <span class="str">&lt;ns&gt;</span> \<br>
+&nbsp;&nbsp;<span class="str">pod-security.kubernetes.io/enforce=privileged</span><br>
+<span class="pr">$</span> <span class="cmd">kubectl</span> delete rs <span class="str">&lt;replicaset&gt;</span> <span class="arg">-n</span> <span class="str">&lt;ns&gt;</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">18</div></div>
+    </section>
+
+    <!-- 19 · Section 04 – Leaf -->
+    <section class="slide l-section" data-screen-label="19 Section-운영">
+      <svg class="swoosh" style="right:0;top:0;left:auto" width="480" height="720" viewBox="0 0 480 720" fill="none">
+        <defs><linearGradient id="gLeaf3" x1="480" y1="0" x2="0" y2="720" gradientUnits="userSpaceOnUse"><stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/></linearGradient></defs>
+        <path d="M480 0 V720 H120 C 300 640 360 520 360 360 C 360 200 300 80 200 0 Z" fill="url(#gLeaf3)"/>
+        <path d="M186 0 C 288 84 346 202 346 360 C 346 522 286 644 100 720" stroke="#0193C2" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="sec-num">SECTION 04</div>
+      <h2>운영 포인트<br>&amp; 요약</h2>
+      <div class="sec-sub">배포·운영 시 반드시 기억할 다섯 가지.</div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">19</div></div>
+    </section>
+
+    <!-- 20 · 운영 포인트 5 -->
+    <section class="slide l-content" data-screen-label="20 운영 포인트">
+      <div class="head"><h2>운영 포인트 5가지</h2><div class="sub">현장에서 가장 자주 문제가 되는 지점</div></div>
+      <div class="body">
+        <ul>
+          <li><b>1 · 9.1.0 최대 개선</b> — 내장 OCI 레지스트리로 <b>외부 레지스트리 구축 불필요</b>. 아키텍처가 단순해졌다.</li>
+          <li><b>2 · 보안 필수</b> — Depot OCI 업로드는 <b>무인증</b>이므로, 이관 직후 <b>즉시 disable</b> 한다.</li>
+          <li><b>3 · 파일 이동 순서</b> — 인터넷 → Bastion → Admin → Depot → Supervisor. 한 방향 흐름을 지킨다.</li>
+          <li><b>4 · 프록시 경로</b> — 프록시 사용 시 YAML 이미지 경로를 <span class="mono">depot-image-proxy</span> 기준으로 수정한다.</li>
+          <li><b>5 · 검증 BOM 준수</b> — vCenter 9.1.0 / VKS 3.6.3 / K8s 1.34.2 / Packages 3.6.0-20260211 / CLI 9.1.0 조합을 지킨다.</li>
+        </ul>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">20</div></div>
+    </section>
+
+    <!-- 21 · Big statement -->
+    <section class="slide l-big" data-screen-label="21 핵심 메시지">
+      <div style="position:absolute;left:90px;top:180px" class="eyebrow">Key Takeaway</div>
+      <div class="statement">VCF 9.1.0의 <em>내장 OCI 레지스트리</em>가<br>에어갭 VKS 배포를 단순화한다 —<br>외부 레지스트리 없이, 한 방향 파일 반입만으로.</div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">21</div></div>
+    </section>
+
+    <!-- 22 · Thanks -->
+    <section class="slide l-thanks" data-screen-label="22 Thank You">
+      <svg class="swoosh" style="right:0;top:0;left:auto" width="520" height="720" viewBox="0 0 520 720" fill="none">
+        <defs><linearGradient id="gPlum2" x1="520" y1="0" x2="0" y2="720" gradientUnits="userSpaceOnUse"><stop stop-color="#6C4B8F"/><stop offset="1" stop-color="#005B84"/></linearGradient></defs>
+        <path d="M520 0 V720 H160 C 340 640 400 520 400 360 C 400 200 340 80 240 0 Z" fill="url(#gPlum2)"/>
+        <path d="M226 0 C 328 84 386 202 386 360 C 386 522 326 644 140 720" stroke="#EDB516" stroke-width="3" fill="none"/>
+      </svg>
+      <h2>Thank You</h2>
+      <div class="contact">
+        <b>참고 원문 · 최신 절차 확인</b><br>
+        <a href="https://github.com/vmware/vsphere-supervisor/blob/main/airgapped/air-gapped-vcf91.md">github.com/vmware/vsphere-supervisor · airgapped/air-gapped-vcf91.md</a><br>
+        VCF / VVF 9.1.0 기준 · 도구 버전은 위 원문의 검증 BOM을 최종 확인하세요
+      </div>
+      <div class="footer">
+        <div>Broadcom Proprietary and Confidential. Copyright © 2025 Broadcom. All Rights Reserved.</div>
+        <div class="brand-mark">VMware <span>by Broadcom</span></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<nav class="nav">
+  <button id="prev" aria-label="Previous">‹</button>
+  <div class="dots" id="dots"></div>
+  <button id="next" aria-label="Next">›</button>
+</nav>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dotsBox = document.getElementById('dots');
+  var KEY = 'vks-airgap-vcf91-pos';
+  var idx = 0;
+  var saved = parseInt(localStorage.getItem(KEY), 10);
+  if (!isNaN(saved) && saved >= 0 && saved < slides.length) idx = saved;
+
+  slides.forEach(function (_, i) {
+    var d = document.createElement('div');
+    d.className = 'dot' + (i === idx ? ' on' : '');
+    d.addEventListener('click', function () { go(i); });
+    dotsBox.appendChild(d);
+  });
+  var dots = Array.prototype.slice.call(dotsBox.children);
+
+  function go(i) {
+    idx = (i + slides.length) % slides.length;
+    slides.forEach(function (s, k) { s.classList.toggle('active', k === idx); });
+    dots.forEach(function (d, k) { d.classList.toggle('on', k === idx); });
+    try { localStorage.setItem(KEY, idx); } catch (e) {}
+  }
+  go(idx);
+  document.getElementById('prev').addEventListener('click', function () { go(idx - 1); });
+  document.getElementById('next').addEventListener('click', function () { go(idx + 1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') go(idx - 1);
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(idx + 1); }
+  });
+
+  function fit() {
+    var deck = document.getElementById('deck');
+    var s = Math.min(window.innerWidth / 1280, window.innerHeight / 720) * 0.96;
+    deck.style.transform = 'scale(' + s + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+})();
+</script>
+</body>
+</html>
