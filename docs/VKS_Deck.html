@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VKS — vSphere Kubernetes Service · 슬라이드 (Broadcom 템플릿)</title>
+<style>
+  :root {
+    --vmw-navy: #1B1E35;
+    --vmw-white: #FFFFFF;
+    --vmw-gray: #F2F2F2;
+    --vmw-teal: #007A86;
+    --vmw-blue: #005B84;
+    --vmw-sky: #0193C2;
+    --vmw-green: #61A00A;
+    --vmw-plum: #6C4B8F;
+    --vmw-gold: #EDB516;
+    --vmw-link: #E18629;
+    --grad-leaf: linear-gradient(135deg, #61A00A 0%, #007A86 100%);
+    --grad-aqua: linear-gradient(135deg, #0193C2 0%, #005B84 100%);
+    --grad-plum: linear-gradient(135deg, #6C4B8F 0%, #005B84 100%);
+    --font-sans: Arial, "Helvetica Neue", Helvetica, Roboto, sans-serif;
+    --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: #26283f; font-family: var(--font-sans); }
+
+  .stage { position: fixed; inset: 0; overflow: hidden; }
+  .deck { position: absolute; left: 50%; top: 50%; margin-left: -640px; margin-top: -360px;
+    width: 1280px; height: 720px; transform-origin: center; }
+
+  .slide {
+    position: absolute; inset: 0; width: 1280px; height: 720px;
+    background: var(--vmw-white); color: var(--vmw-navy);
+    display: none; overflow: hidden;
+  }
+  .slide.active { display: block; }
+
+  /* ---------- shared chrome ---------- */
+  .footer {
+    position: absolute; left: 64px; right: 64px; bottom: 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px; color: #8a8d9c; letter-spacing: .01em;
+  }
+  .brand-mark { font-size: 13px; font-weight: 700; color: var(--vmw-navy); letter-spacing: -.01em; }
+  .brand-mark span { font-weight: 400; color: #6a6e80; }
+  .page-no { font-size: 11px; color: #8a8d9c; }
+
+  .eyebrow {
+    display: inline-block; font-size: 14px; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--vmw-teal); margin-bottom: 18px;
+  }
+  .swoosh { position: absolute; pointer-events: none; }
+
+  /* ---------- L1: Title ---------- */
+  .l-title .title-block { position: absolute; left: 560px; right: 72px; top: 176px; }
+  .l-title h1 { font-size: 44px; line-height: 1.16; font-weight: 700; letter-spacing: -.015em; color: var(--vmw-navy); }
+  .l-title .rule { width: 100%; height: 2px; background: var(--vmw-sky); margin: 24px 0; }
+  .l-title .subtitle { font-size: 19px; color: #4b4f63; line-height: 1.45; }
+  .l-title .meta { position: absolute; left: 560px; top: 520px; font-size: 13px; color: #6a6e80; line-height: 1.7; }
+  .l-title .meta b { color: var(--vmw-navy); }
+
+  /* ---------- L2: Agenda ---------- */
+  .l-agenda .head { position: absolute; left: 64px; top: 60px; right: 64px; }
+  .l-agenda h2 { font-size: 36px; font-weight: 700; letter-spacing: -.01em; }
+  .l-agenda .head .bar { width: 64px; height: 4px; background: var(--grad-leaf); margin-top: 16px; border-radius: 2px; }
+  .l-agenda ol { position: absolute; left: 64px; right: 64px; top: 176px; bottom: 78px;
+    display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; row-gap: 4px; list-style: none;
+    grid-auto-rows: min-content; }
+  .l-agenda li { display: flex; gap: 18px; padding: 14px 0; border-bottom: 1px solid #e3e5ec; align-items: baseline; }
+  .l-agenda .num { font-size: 20px; font-weight: 700; color: var(--vmw-teal); min-width: 34px; }
+  .l-agenda .item-title { font-size: 18px; font-weight: 700; }
+  .l-agenda .item-sub { font-size: 12.5px; color: #6a6e80; margin-top: 3px; }
+
+  /* ---------- L3: Section ---------- */
+  .l-section .sec-num { position: absolute; left: 64px; top: 190px; font-size: 20px; font-weight: 700; color: var(--vmw-teal); letter-spacing: .2em; }
+  .l-section h2 { position: absolute; left: 64px; top: 240px; width: 640px; font-size: 50px; line-height: 1.12; font-weight: 700; letter-spacing: -.015em; }
+  .l-section .sec-sub { position: absolute; left: 64px; top: 460px; width: 580px; font-size: 18px; color: #4b4f63; line-height: 1.5; }
+
+  /* ---------- L4: Content ---------- */
+  .l-content .head, .l-two .head, .l-data .head, .l-flow .head, .l-steps .head {
+    position: absolute; left: 64px; top: 52px; right: 64px; padding-bottom: 18px; border-bottom: 2px solid var(--vmw-teal);
+  }
+  .l-content h2, .l-two h2, .l-data h2, .l-flow h2, .l-steps h2 { font-size: 29px; font-weight: 700; letter-spacing: -.01em; }
+  .l-content .head .sub, .l-two .head .sub, .l-data .head .sub, .l-flow .head .sub, .l-steps .head .sub { font-size: 14px; color: #6a6e80; margin-top: 7px; }
+  .l-content .body { position: absolute; left: 64px; right: 64px; top: 164px; bottom: 76px; }
+  .l-content ul { list-style: none; }
+  .l-content ul li { position: relative; padding: 9px 0 9px 28px; font-size: 18px; line-height: 1.45; color: #2c3047; }
+  .l-content ul li::before { content: ""; position: absolute; left: 0; top: 18px; width: 11px; height: 11px; border-radius: 3px; background: var(--grad-leaf); }
+  .l-content ul li b { color: var(--vmw-navy); }
+  .l-content ul ul li { font-size: 15px; color: #4b4f63; padding: 5px 0 5px 24px; }
+  .l-content ul ul li::before { width: 7px; height: 7px; top: 13px; border-radius: 50%; background: var(--vmw-sky); }
+
+  /* ---------- L5: Two-column ---------- */
+  .l-two .cols { position: absolute; left: 64px; right: 64px; top: 164px; bottom: 76px; display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+  .card { background: var(--vmw-gray); border-radius: 14px; padding: 24px 28px; }
+  .card .card-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--vmw-white); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px; }
+  .card.leaf .card-tag { background: var(--grad-leaf); }
+  .card.aqua .card-tag { background: var(--grad-aqua); }
+  .card.plum .card-tag { background: var(--grad-plum); }
+  .card h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+  .card p, .card li { font-size: 14.5px; line-height: 1.5; color: #4b4f63; }
+  .card ul { list-style: none; margin-top: 4px; }
+  .card ul li { padding: 4px 0 4px 18px; position: relative; }
+  .card ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 7px; height: 7px; border-radius: 50%; background: var(--vmw-teal); }
+  .card ul li b { color: var(--vmw-navy); }
+
+  /* ---------- L6: Data ---------- */
+  .l-data .metrics { position: absolute; left: 64px; right: 64px; top: 176px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .metric { border: 1px solid #e3e5ec; border-radius: 14px; padding: 22px 26px; }
+  .metric .big { font-size: 42px; font-weight: 700; letter-spacing: -.02em; }
+  .metric.leaf .big { color: var(--vmw-green); }
+  .metric.aqua .big { color: var(--vmw-teal); }
+  .metric.plum .big { color: var(--vmw-plum); }
+  .metric .label { font-size: 14px; font-weight: 700; margin-top: 6px; }
+  .metric .desc { font-size: 12.5px; color: #6a6e80; margin-top: 5px; line-height: 1.45; }
+  .l-data table { position: absolute; left: 64px; right: 64px; top: 388px; width: calc(100% - 128px); border-collapse: collapse; font-size: 14px; }
+  .l-data th { text-align: left; padding: 11px 16px; background: var(--vmw-navy); color: var(--vmw-white); font-weight: 700; }
+  .l-data th:first-child { border-radius: 8px 0 0 8px; }
+  .l-data th:last-child { border-radius: 0 8px 8px 0; }
+  .l-data td { padding: 10px 16px; border-bottom: 1px solid #e3e5ec; color: #2c3047; }
+  .l-data td b { color: var(--vmw-teal); }
+  .mono { font-family: var(--font-mono); font-size: 13px; }
+
+  /* ---------- L8: Big ---------- */
+  .l-big { background: var(--vmw-navy); color: var(--vmw-white); }
+  .l-big .statement { position: absolute; left: 90px; right: 90px; top: 232px; font-size: 50px; line-height: 1.2; font-weight: 700; letter-spacing: -.015em; }
+  .l-big .statement em { font-style: normal; background: var(--grad-leaf); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .l-big .eyebrow { color: #7dd0d8; }
+  .l-big .footer { color: #6d7188; }
+  .l-big .brand-mark { color: var(--vmw-white); }
+  .l-big .brand-mark span { color: #9ba0b8; }
+
+  /* ---------- L9: Thanks ---------- */
+  .l-thanks h2 { position: absolute; left: 90px; top: 250px; font-size: 66px; font-weight: 700; letter-spacing: -.02em; }
+  .l-thanks .contact { position: absolute; left: 90px; top: 392px; font-size: 16px; line-height: 1.8; color: #4b4f63; width: 560px; }
+  .l-thanks .contact b { color: var(--vmw-navy); }
+  .l-thanks .contact a { color: var(--vmw-link); text-decoration: none; word-break: break-all; }
+
+  /* ---------- code blocks ---------- */
+  .code { background: var(--vmw-navy); border-radius: 10px; padding: 14px 18px;
+    font-family: var(--font-mono); font-size: 13px; line-height: 1.65; color: #dfe2ef; }
+  .code .c { color: #7a80a0; }         /* comment */
+  .code .cmd { color: #8ad35a; }        /* command keyword */
+  .code .arg { color: #5ec7e0; }        /* flag / arg */
+  .code .str { color: #edb516; }        /* value / string */
+  .code .pr { color: #61A00A; font-weight: 700; }  /* prompt $ */
+
+  /* ---------- callout ---------- */
+  .callout { display: flex; gap: 12px; align-items: flex-start; border-radius: 12px;
+    padding: 14px 18px; font-size: 14px; line-height: 1.5; }
+  .callout .ico { flex: none; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #fff; }
+  .callout.warn { background: #fdf6e3; border: 1px solid #f0d98a; color: #6b5713; }
+  .callout.warn .ico { background: var(--vmw-gold); color: var(--vmw-navy); }
+  .callout.warn b { color: #7a5a00; }
+  .callout.tip { background: #eaf5f6; border: 1px solid #b9dde0; color: #234b4f; }
+  .callout.tip .ico { background: var(--vmw-teal); }
+  .callout.tip b { color: var(--vmw-teal); }
+
+  /* ---------- FLOW diagram ---------- */
+  .l-flow .flow { position: absolute; left: 64px; right: 64px; top: 210px;
+    display: flex; align-items: stretch; gap: 0; }
+  .fnode { flex: 1 1 0; border-radius: 14px; background: var(--vmw-gray); border: 1px solid #e3e5ec;
+    padding: 18px 14px 16px; text-align: center; position: relative; min-height: 168px; display: flex; flex-direction: column; }
+  .fnode .bar { position: absolute; left: 0; right: 0; top: 0; height: 6px; border-radius: 14px 14px 0 0; }
+  .fnode.n1 .bar { background: #9aa0b4; }
+  .fnode.n2 .bar { background: var(--grad-aqua); }
+  .fnode.n3 .bar { background: var(--grad-leaf); }
+  .fnode.n4 .bar { background: var(--grad-aqua); }
+  .fnode.n5 .bar { background: var(--grad-plum); }
+  .fnode .ficon { font-size: 26px; margin: 8px 0 10px; line-height: 1; }
+  .fnode .ftitle { font-size: 16px; font-weight: 700; color: var(--vmw-navy); }
+  .fnode .fkr { font-size: 12px; color: #6a6e80; margin-top: 2px; }
+  .fnode .fdesc { font-size: 12px; color: #4b4f63; margin-top: 10px; line-height: 1.45; }
+  .farrow { flex: 0 0 44px; display: flex; align-items: center; justify-content: center; color: var(--vmw-teal); font-size: 26px; font-weight: 700; }
+  .fgap { flex: 0 0 62px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .fgap::before { content: ""; position: absolute; top: -14px; bottom: -14px; left: 50%; border-left: 2px dashed var(--vmw-gold); }
+  .fgap .glabel { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+    font-size: 11px; font-weight: 700; color: #9a7a00; background: #fdf6e3; border: 1px solid #f0d98a; padding: 4px 10px; border-radius: 999px; }
+  .fgap .garrow { color: var(--vmw-gold); font-size: 24px; font-weight: 700; z-index: 1; background: #fff; padding: 0 2px; }
+  .l-flow .flowcap { position: absolute; left: 64px; right: 64px; top: 470px;
+    font-size: 15px; color: #4b4f63; line-height: 1.6; }
+  .l-flow .flowcap b { color: var(--vmw-teal); }
+  .l-flow .flowcap .oneway { font-weight: 700; color: var(--vmw-navy); }
+
+  /* ---------- STEPS overview ---------- */
+  .l-steps .grid { position: absolute; left: 64px; right: 64px; top: 172px; bottom: 76px;
+    display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 1fr 1fr; gap: 18px; }
+  .step { border: 1px solid #e3e5ec; border-radius: 13px; padding: 16px 18px; position: relative; overflow: hidden; }
+  .step .sn { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+  .step .st { font-size: 15.5px; font-weight: 700; color: var(--vmw-navy); margin-top: 8px; }
+  .step .sd { font-size: 12px; color: #6a6e80; margin-top: 6px; line-height: 1.45; }
+  .step .host { position: absolute; top: 16px; right: 16px; font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+  .step.p-dl .sn { color: var(--vmw-sky); }   .step.p-dl .host { background: #e3f2f6; color: var(--vmw-blue); }
+  .step.p-sup .sn { color: var(--vmw-teal); } .step.p-sup .host { background: #e0f0e0; color: var(--vmw-green); }
+  .step.p-adm .sn { color: var(--vmw-plum); } .step.p-adm .host { background: #efe8f5; color: var(--vmw-plum); }
+  .step.p-dep .sn { color: var(--vmw-gold); } .step.p-dep .host { background: #fdf6e3; color: #9a7a00; }
+
+  /* step detail slides reuse l-content .body split */
+  .split { position: absolute; left: 64px; right: 64px; top: 164px; bottom: 76px;
+    display: grid; grid-template-columns: 0.92fr 1.08fr; gap: 34px; align-items: start; }
+  .split .lead { list-style: none; }
+  .split .lead li { position: relative; padding: 8px 0 8px 26px; font-size: 16px; line-height: 1.45; color: #2c3047; }
+  .split .lead li::before { content: ""; position: absolute; left: 0; top: 15px; width: 10px; height: 10px; border-radius: 3px; background: var(--grad-leaf); }
+  .split .lead li b { color: var(--vmw-navy); }
+  .split .codeblk { display: flex; flex-direction: column; gap: 12px; }
+  .codelabel { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--vmw-teal); margin-bottom: -4px; }
+
+  /* ---------- navigation ---------- */
+  .nav {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 14px; z-index: 50;
+    background: rgba(27,30,53,.82); border-radius: 999px; padding: 8px 16px; backdrop-filter: blur(6px);
+  }
+  .nav button { border: 0; background: transparent; color: #fff; font-size: 16px; cursor: pointer;
+    width: 30px; height: 30px; border-radius: 50%; font-family: var(--font-sans); }
+  .nav button:hover { background: rgba(255,255,255,.15); }
+  .dots { display: flex; gap: 6px; flex-wrap: wrap; max-width: 520px; justify-content: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.3); cursor: pointer; transition: all .18s; }
+  .dot.on { background: #fff; width: 20px; border-radius: 4px; }
+
+  /* ---- deck additions: 3-col cards / diagrams / inflow tables ---- */
+  .l-two .cols.three { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .l-two .cols.three .card { padding: 20px 22px; }
+  .l-two .cols.three .card h3 { font-size: 18px; }
+  .l-two .cols.three .card ul li { font-size: 13px; line-height: 1.4; padding: 3px 0 3px 16px; }
+  .l-two .cols.three .card ul li::before { top: 9px; }
+  .l-data.table-only table { top: 176px; }
+  .l-content .body.diagram { display: flex; align-items: center; justify-content: center; }
+  .l-content .body.diagram .slidesvg { width: 100%; height: 100%; }
+  .slidesvg { width: 100%; height: auto; display: block; }
+  .dtable { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 14px; }
+  .dtable th { background: var(--vmw-navy); color: #fff; text-align: left; padding: 8px 14px; font-weight: 700; }
+  .dtable th:first-child { border-radius: 8px 0 0 8px; } .dtable th:last-child { border-radius: 0 8px 8px 0; }
+  .dtable td { padding: 7px 14px; border-bottom: 1px solid #e3e5ec; color: #2c3047; }
+  .dtable td:first-child { color: var(--vmw-teal); font-weight: 700; }
+  .dtable td b { color: var(--vmw-teal); }
+
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="deck" id="deck">
+
+    <!-- 1 · Title -->
+    <section class="slide l-title active" data-screen-label="01 Title">
+      <svg class="swoosh" style="left:0;top:0" width="560" height="720" viewBox="0 0 560 720" fill="none">
+        <defs><linearGradient id="gLeaf" x1="0" y1="720" x2="560" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/></linearGradient></defs>
+        <path d="M0 0 H560 C 380 60 300 180 300 380 C 300 560 220 680 0 720 Z" fill="url(#gLeaf)"/>
+        <path d="M560 14 C 388 76 316 192 316 380 C 316 556 240 672 40 720" stroke="#0193C2" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="title-block">
+        <div class="eyebrow">Customer &amp; Technical Overview</div>
+        <h1>VKS — vSphere<br>Kubernetes Service</h1>
+        <div class="rule"></div>
+        <div class="subtitle">기존 vSphere 인프라를 통째로 쿠버네티스 플랫폼으로 — 고객 소개 · 아키텍처 · VCF 9.1 · 버전별(3.5~3.7)</div>
+      </div>
+      <div class="meta">
+        <b>대상</b> · 고객 소개 및 VKS/VCF 플랫폼 엔지니어<br>
+        기준 · VCF 9.1 · VKS 3.5 / 3.6 / 3.7 · Kubernetes 1.34 → 1.36
+      </div>
+      <div class="footer">
+        <div>Broadcom Proprietary and Confidential. Copyright © 2025 Broadcom. All Rights Reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.</div>
+        <div class="brand-mark">VMware <span>by Broadcom</span></div>
+      </div>
+    </section>
+
+    <!-- 2 · Agenda -->
+    <section class="slide l-agenda" data-screen-label="02 Agenda">
+      <div class="head"><h2>목차</h2><div class="bar"></div></div>
+      <ol>
+        <li><span class="num">01</span><span><span class="item-title">왜 VKS인가</span><div class="item-sub">고객 Pain Point → 해결</div></span></li>
+        <li><span class="num">02</span><span><span class="item-title">핵심 이점 &amp; 활용 사례</span><div class="item-sub">Benefits · Use Cases</div></span></li>
+        <li><span class="num">03</span><span><span class="item-title">숫자 가치 &amp; 도입 여정</span><div class="item-sub">성능·스케일 · 3단계</div></span></li>
+        <li><span class="num">04</span><span><span class="item-title">VKS 아키텍처 &amp; 맵핑</span><div class="item-sub">계층 구조 · K8s↔vSphere</div></span></li>
+        <li><span class="num">05</span><span><span class="item-title">워크로드 · 서비스 · VKR</span><div class="item-sub">3가지 워크로드 · Service</div></span></li>
+        <li><span class="num">06</span><span><span class="item-title">VCF 9.1 &amp; 버전별 3.5~3.7</span><div class="item-sub">DTGW · 신기능 · Add-ons</div></span></li>
+      </ol>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">2</div></div>
+    </section>
+
+    <!-- 3 · 왜 VKS인가 (table) -->
+    <section class="slide l-data table-only" data-screen-label="03 왜 VKS">
+      <div class="head"><h2>왜 VKS인가 — 고객의 고민과 해결</h2><div class="sub">이미 운영 중인 vSphere를 그대로 쿠버네티스 플랫폼으로</div></div>
+      <table>
+        <thead><tr><th style="width:42%">기존 고민 (Pain Point)</th><th>VKS의 해결</th></tr></thead>
+        <tbody>
+          <tr><td>컨테이너용 K8s를 별도 구축·운영 (사일로·이중 투자)</td><td><b>vSphere 위에서 K8s 네이티브 제공</b> — 기존 인프라 재사용</td></tr>
+          <tr><td>개발팀 셀프서비스 요구 vs 인프라팀 통제</td><td>개발자 <b>표준 K8s API</b>, 관리자 <b>vCenter 거버넌스</b></td></tr>
+          <tr><td>K8s 버전·애드온 파편화, 보안 패치 부담</td><td><b>검증된 VKr 번들</b> + 24개월 지원 라이프사이클</td></tr>
+          <tr><td>규제·에어갭 환경의 컨테이너 도입 난이도</td><td>VCF 9.1 <b>내장 Software Depot</b> 기반 에어갭 배포</td></tr>
+          <tr><td>클라우드 대비 비용·거버넌스 가시성 부족</td><td><b>FinOps 비용 분석 + 지속 컴플라이언스</b></td></tr>
+        </tbody>
+      </table>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">3</div></div>
+    </section>
+
+    <!-- 4 · 핵심 이점 & 활용 사례 (two cards) -->
+    <section class="slide l-two" data-screen-label="04 이점·활용">
+      <div class="head"><h2>핵심 이점 &amp; 활용 사례</h2><div class="sub">고객이 얻는 가치와 대표 도입 시나리오</div></div>
+      <div class="cols">
+        <div class="card leaf">
+          <span class="card-tag">Benefits</span>
+          <h3>핵심 이점</h3>
+          <ul>
+            <li><b>익숙한 운영</b> — vCenter·DRS·vSAN·NSX 그대로</li>
+            <li><b>개발자 셀프서비스</b> — 네임스페이스→온디맨드</li>
+            <li><b>엔터프라이즈 보안</b> — vPod 격리·CIS/STIG·OIDC</li>
+            <li><b>검증된 안정성</b> — CNCF + Broadcom 검증 애드온</li>
+            <li><b>경제성</b> — 기존 HW·라이선스 재사용, 비용 showback</li>
+          </ul>
+        </div>
+        <div class="card plum">
+          <span class="card-tag">Use Cases</span>
+          <h3>이런 고객에게</h3>
+          <ul>
+            <li><b>앱 현대화</b> — 레거시 VM + 신규 컨테이너 통합</li>
+            <li><b>AI/ML</b> — Custom Zone + 지능형 배치로 GPU 격리</li>
+            <li><b>Telco/5G</b> — SR-IOV·DPDK 보조 NIC로 CNF 고성능</li>
+            <li><b>멀티테넌시/CSP</b> — 테넌트별 키·다중 네트워크·500 스케일</li>
+            <li><b>규제·에어갭</b> — 인터넷 차단 환경 안전 배포</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">4</div></div>
+    </section>
+
+    <!-- 5 · 숫자 가치 + 도입 여정 (metrics + flow) -->
+    <section class="slide l-data" data-screen-label="05 숫자·여정">
+      <div class="head"><h2>숫자로 보는 가치 &amp; 도입 여정</h2><div class="sub">VCF 9.1 기준 성능·스케일과 3단계 도입 경로</div></div>
+      <div class="metrics">
+        <div class="metric leaf"><div class="big">70%<span style="font-size:20px">↓</span></div><div class="label">클러스터 프로비저닝</div><div class="desc">약 37 → 11분 · Fast Deploy</div></div>
+        <div class="metric aqua"><div class="big">500</div><div class="label">클러스터 / Supervisor</div><div class="desc">4,000 노드 · 워커 최대 250대</div></div>
+        <div class="metric plum"><div class="big">40%<span style="font-size:20px">↑</span></div><div class="label">네트워크 성능</div><div class="desc">Antrea 하이브리드 · DTGW Line-rate</div></div>
+      </div>
+      <svg class="slidesvg" style="position:absolute;left:64px;right:64px;top:400px;width:calc(100% - 128px);height:200px" viewBox="0 0 1120 200">
+        <style>.jt{fill:#1B1E35;font:700 20px Arial}.jd{fill:#4b4f63;font:400 14px Arial}.jn{fill:#fff;font:700 20px Arial}</style>
+        <g>
+          <circle cx="60" cy="60" r="24" fill="#0193C2"/><text x="60" y="67" text-anchor="middle" class="jn">1</text>
+          <text x="100" y="52" class="jt">활성화</text><text x="100" y="80" class="jd">VCF 9.1에서 Supervisor 활성화 (vCenter·NSX·스토리지)</text>
+          <line x1="60" y1="92" x2="60" y2="120" stroke="#cfd2dc" stroke-width="2"/>
+        </g>
+        <g transform="translate(0,0)">
+          <circle cx="60" cy="140" r="24" fill="#007A86"/><text x="60" y="147" text-anchor="middle" class="jn">2</text>
+          <text x="100" y="132" class="jt">네임스페이스 할당</text><text x="100" y="160" class="jd">팀·프로젝트별 vSphere Namespace 생성 → 쿼터·권한 부여</text>
+        </g>
+        <g transform="translate(580,0)">
+          <circle cx="60" cy="140" r="24" fill="#61A00A"/><text x="60" y="147" text-anchor="middle" class="jn">3</text>
+          <text x="100" y="132" class="jt">셀프서비스 배포</text><text x="100" y="160" class="jd">개발팀이 클러스터·VM·vPod을 K8s API로 온디맨드</text>
+        </g>
+      </svg>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">5</div></div>
+    </section>
+
+    <!-- 6 · 아키텍처 다이어그램 -->
+    <section class="slide l-content" data-screen-label="06 아키텍처">
+      <div class="head"><h2>VKS 아키텍처 — 계층 구조</h2><div class="sub">vSphere에 내장된 쿠버네티스 컨트롤 플레인 · 인프라부터 워크로드 클러스터까지</div></div>
+      <div class="body diagram">
+        <svg class="slidesvg" viewBox="0 0 1120 470">
+          <style>
+            .at{fill:#1B1E35;font:700 20px Arial}.as{fill:#4b4f63;font:400 14px Arial}
+            .an{fill:#1B1E35;font:700 16px Arial}.ans{fill:#6a6e80;font:400 12px Arial}.aw{fill:#6a6e80;font:700 12px Arial;letter-spacing:1px}
+          </style>
+          <!-- workload layer -->
+          <rect x="20" y="10" width="1080" height="180" rx="14" fill="#f3eef7" stroke="#6C4B8F" stroke-opacity=".4"/>
+          <text x="44" y="40" class="aw">WORKLOAD · 개발팀이 사용</text>
+          <text x="44" y="66" class="at" fill="#6C4B8F">VKS 워크로드 클러스터 (Guest / TKG · 버전단위 VKr)</text>
+          <rect x="44" y="86" width="330" height="86" rx="10" fill="#fff" stroke="#cbb8de"/>
+          <text x="64" y="118" class="an">VM Services</text><text x="64" y="142" class="ans">전통 VM을 K8s API로 관리</text>
+          <rect x="396" y="86" width="330" height="86" rx="10" fill="#fff" stroke="#cbb8de"/>
+          <text x="416" y="118" class="an">vPod</text><text x="416" y="142" class="ans">ESXi 위 직접 실행 네이티브 Pod</text>
+          <rect x="748" y="86" width="330" height="86" rx="10" fill="#fff" stroke="#cbb8de"/>
+          <text x="768" y="118" class="an">VKS Cluster</text><text x="768" y="142" class="ans">독립 업스트림 K8s (CP+Worker VM)</text>
+          <!-- arrow -->
+          <path d="M560 190 L560 214" stroke="#9aa0b4" stroke-width="2"/><path d="M560 214 l-6 -8 h12 z" fill="#9aa0b4"/>
+          <text x="576" y="208" class="ans">프로비저닝 · 라이프사이클</text>
+          <!-- supervisor -->
+          <rect x="20" y="222" width="1080" height="96" rx="14" fill="#eef6f7" stroke="#007A86" stroke-opacity=".4"/>
+          <text x="44" y="252" class="aw">CONTROL PLANE</text>
+          <text x="44" y="280" class="at" fill="#007A86">Supervisor — 관리용 K8s 컨트롤 플레인</text>
+          <text x="44" y="303" class="as">vCenter 내 프로비저닝 · vSphere Namespace로 테넌시·쿼터·정책 경계 · CAPI/CAPV + ClusterClass</text>
+          <!-- arrow -->
+          <path d="M560 318 L560 342" stroke="#9aa0b4" stroke-width="2"/><path d="M560 342 l-6 -8 h12 z" fill="#9aa0b4"/>
+          <!-- infra -->
+          <rect x="20" y="350" width="1080" height="96" rx="14" fill="#f2f2f2" stroke="#cfd2dc"/>
+          <text x="44" y="380" class="aw">INFRASTRUCTURE</text>
+          <text x="44" y="408" class="at">vSphere / ESXi</text>
+          <text x="44" y="431" class="as">컴퓨트·스토리지·네트워크 기반 · 각 ESXi가 Spherelet(Kubelet의 vSphere 구현)으로 워커처럼 동작</text>
+        </svg>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">6</div></div>
+    </section>
+
+    <!-- 7 · 구성요소 맵핑 (table) -->
+    <section class="slide l-data table-only" data-screen-label="07 맵핑">
+      <div class="head"><h2>구성요소 맵핑 — K8s ↔ vSphere</h2><div class="sub">쿠버네티스 논리 구조가 vSphere 물리 자원에 그대로 대응된다</div></div>
+      <table>
+        <thead><tr><th style="width:24%">Kubernetes 개념</th><th style="width:30%">vSphere 구성요소</th><th>매핑 설명</th></tr></thead>
+        <tbody>
+          <tr><td><b>Control Plane</b></td><td>Supervisor VM <span class="mono">(in vCenter)</span></td><td>vCenter 내 프로비저닝, K8s 컨트롤 플레인 역할</td></tr>
+          <tr><td><b>Worker Node</b></td><td>ESXi Host + Spherelet</td><td>Kubelet의 vSphere 구현체로 ESXi가 워커처럼 동작</td></tr>
+          <tr><td><b>Namespace</b></td><td>Resource Pool</td><td>CPU·메모리 Quota·권한을 하이퍼바이저 레벨서 제어</td></tr>
+          <tr><td><b>StorageClass</b></td><td>Datastore <span class="mono">(vSAN/VMFS/NFS)</span></td><td>개발자가 스토리지를 손쉽게 동적 호출</td></tr>
+          <tr><td><b>PersistentVolume</b></td><td>VMDK <span class="mono">(First Class Disk)</span></td><td>PVC 요청이 FCD 가상 디스크로 동적 생성·마운트</td></tr>
+          <tr><td><b>CNI</b></td><td>NSX / VDS Networks</td><td>논리 스위치·LB·라우터로 가상화되어 패브릭에 매핑</td></tr>
+        </tbody>
+      </table>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">7</div></div>
+    </section>
+
+    <!-- 8 · 3가지 워크로드 (3 cards) -->
+    <section class="slide l-two" data-screen-label="08 워크로드">
+      <div class="head"><h2>Supervisor가 배포하는 3가지 워크로드</h2><div class="sub">전통 VM부터 하이퍼바이저 네이티브 Pod, 완전한 게스트 클러스터까지</div></div>
+      <div class="cols three">
+        <div class="card leaf"><span class="card-tag">VM Services</span><h3>전통 VM을 K8s API로</h3>
+          <ul><li>기존 VM을 <b>K8s API(YAML)</b>로 관리</li><li>VM Operator CRD (VirtualMachine)</li><li>VM 생명주기 자동화</li></ul></div>
+        <div class="card aqua"><span class="card-tag">vPod</span><h3>vSphere Pods</h3>
+          <ul><li>ESXi 위에서 <b>직접 실행</b>되는 네이티브 Pod</li><li><b>VM 격리 수준</b> 보안·별도 Worker VM 불필요</li><li>빠른 프로비저닝·높은 성능</li></ul></div>
+        <div class="card plum"><span class="card-tag">VKS Cluster</span><h3>Guest / TKG 클러스터</h3>
+          <ul><li>독립적 <b>업스트림 K8s</b> 클러스터</li><li>CP+Worker 모두 VM·표준 K8s API 호환</li><li>멀티 테넌트·Helm/kubectl</li></ul></div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">8</div></div>
+    </section>
+
+    <!-- 9 · Service & VKR (3 cards) -->
+    <section class="slide l-two" data-screen-label="09 Service·VKR">
+      <div class="head"><h2>Supervisor Service · VKS Service · VKR</h2><div class="sub">플랫폼 서비스 · 클러스터 수명주기 · 검증된 릴리스 번들</div></div>
+      <div class="cols three">
+        <div class="card leaf"><span class="card-tag">Supervisor Svc</span><h3>플랫폼 컨트롤 플레인</h3>
+          <ul><li>vSphere 위 <b>K8s 컨트롤 플레인 서비스</b></li><li>개발자에 <b>K8s API 엔드포인트</b> 제공</li><li>vCenter에서 <b>중앙 집중 거버넌스</b></li></ul></div>
+        <div class="card aqua"><span class="card-tag">VKS Service</span><h3>클러스터 수명주기</h3>
+          <ul><li>생성·스케일·업그레이드 <b>자동화</b></li><li><b>CNCF 인증</b> K8s 온디맨드</li><li>셀프 서비스 경험</li></ul></div>
+        <div class="card plum"><span class="card-tag">VKR / TKr</span><h3>릴리스 번들</h3>
+          <ul><li><b>K8s+OS+애드온</b> 검증 패키지</li><li>CoreDNS·CNI·CSI 포함</li><li>버전 <b>파편화 방지</b> · 24개월 지원</li></ul></div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">9</div></div>
+    </section>
+
+    <!-- 10 · VCF 9.1 DTGW diagram -->
+    <section class="slide l-content" data-screen-label="10 9.1 DTGW">
+      <div class="head"><h2>VCF 9.1 핵심 변화 — DTGW</h2><div class="sub">Distributed Transit Gateway — 전용 NSX Edge 노드 제거, Line-rate 성능</div></div>
+      <div class="body diagram">
+        <svg class="slidesvg" viewBox="0 0 1120 360">
+          <style>.fl{fill:#6a6e80;font:600 15px Arial}.ft{fill:#1B1E35;font:700 18px Arial}</style>
+          <text x="30" y="34" class="ft">VCF 9.0 — 전용 NSX Edge 경유 (병목)</text>
+          <rect x="30" y="56" width="200" height="60" rx="9" fill="#f2f2f2" stroke="#cfd2dc"/><text x="60" y="92" class="fl">ESXi Hosts</text>
+          <rect x="300" y="56" width="210" height="60" rx="9" fill="#fff7d6" stroke="#EDB516"/><text x="322" y="92" class="fl">NSX Edge Cluster</text>
+          <rect x="30" y="176" width="480" height="52" rx="9" fill="#f2f2f2" stroke="#cfd2dc"/><text x="190" y="208" class="fl">Physical Switch Fabric</text>
+          <line x1="230" y1="86" x2="300" y2="86" stroke="#EDB516" stroke-width="3"/>
+          <line x1="405" y1="116" x2="405" y2="176" stroke="#EDB516" stroke-width="3"/>
+          <text x="30" y="270" class="fl" fill="#9a7a00">⚠ 엣지 노드가 병목 · 추가 홉 발생</text>
+
+          <line x1="580" y1="20" x2="580" y2="300" stroke="#e3e5ec" stroke-width="2"/>
+
+          <text x="620" y="34" class="ft">VCF 9.1 — DTGW 직접 연결 (Line-rate)</text>
+          <rect x="620" y="56" width="240" height="60" rx="9" fill="#eef6f7" stroke="#007A86"/><text x="648" y="92" class="fl">ESXi + DTGW</text>
+          <rect x="620" y="176" width="470" height="52" rx="9" fill="#f2f2f2" stroke="#cfd2dc"/><text x="800" y="208" class="fl">Physical Switch Fabric</text>
+          <line x1="740" y1="116" x2="740" y2="176" stroke="#007A86" stroke-width="4"/>
+          <text x="620" y="270" class="fl" fill="#007A86">✓ 전용 Edge 노드 불필요 · 분산 브리징 · 성능 극대화</text>
+        </svg>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">10</div></div>
+    </section>
+
+    <!-- 11 · 9.1 신규기능 (bullets) -->
+    <section class="slide l-content" data-screen-label="11 9.1 기능">
+      <div class="head"><h2>VCF 9.1 신규 기능 &amp; 성능·스케일</h2><div class="sub">Zone·멀티네트워크·지능형 배치 + 구성 한도 확장</div></div>
+      <div class="body">
+        <ul>
+          <li><b>Enhanced Zone Architecture</b> — Zone당 여러 클러스터, 무중단 HW 교체·AI GPU용 Custom Zone</li>
+          <li><b>Multi Network</b> — 테넌트당 다중 Transit Gateway·외부 연결 · <b>Node Customization</b> TuneD·AppArmor</li>
+          <li><b>Intelligent Node Pool Placement</b> — vSphere DRS가 GPU·NVMe 요구 자동 분석·최적 배치</li>
+          <li><b>VCF Mgmt / VCFA</b> — FinOps 비용 분석·지속 컴플라이언스·블루프린트 셀프서비스</li>
+          <li><b>구성 한도</b> — Max ESX 5,000대 · Supervisor당 클러스터 100 → <b>500</b> · 프로비저닝 70%↓·업그레이드 67%↓</li>
+        </ul>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">11</div></div>
+    </section>
+
+    <!-- 12 · 버전 타임라인 + 표 -->
+    <section class="slide l-content" data-screen-label="12 버전">
+      <div class="head"><h2>버전별 변화 (VKS 3.5 → 3.7)</h2><div class="sub">각 메이저 버전은 이전 VKr 호환 제거 · ClusterClass 리베이스 필수</div></div>
+      <div class="body">
+        <svg class="slidesvg" style="max-height:150px" viewBox="0 0 1120 150">
+          <style>.tt{fill:#1B1E35;font:700 20px Arial}.ts{fill:#6a6e80;font:600 14px Arial}.tk{fill:#007A86;font:700 15px Arial}</style>
+          <line x1="120" y1="60" x2="1000" y2="60" stroke="#cfd2dc" stroke-width="2"/>
+          <circle cx="200" cy="60" r="12" fill="#007A86"/><text x="200" y="34" class="tt" text-anchor="middle">3.5</text><text x="200" y="92" class="tk" text-anchor="middle">K8s 1.34</text><text x="200" y="114" class="ts" text-anchor="middle">2025-10 · CAPI v1beta2</text>
+          <circle cx="560" cy="60" r="12" fill="#0193C2"/><text x="560" y="34" class="tt" text-anchor="middle">3.6</text><text x="560" y="92" class="tk" text-anchor="middle">K8s 1.35</text><text x="560" y="114" class="ts" text-anchor="middle">2026-02 · RHEL·ImageBaker</text>
+          <circle cx="920" cy="60" r="12" fill="#6C4B8F"/><text x="920" y="34" class="tt" text-anchor="middle">3.7</text><text x="920" y="92" class="tk" text-anchor="middle">K8s 1.36</text><text x="920" y="114" class="ts" text-anchor="middle">2026-06 · 5노드 CP·OIDC</text>
+        </svg>
+        <table class="dtable">
+          <thead><tr><th style="width:8%">VKS</th><th style="width:14%">K8s(VKr)</th><th>핵심 키워드</th></tr></thead>
+          <tbody>
+            <tr><td>3.5</td><td>v1.34</td><td>Cluster API v1beta2 · AddonRepository API · CIS/STIG 구성변수 · PDB 가드레일</td></tr>
+            <tr><td>3.6</td><td>v1.35</td><td>RHEL 노드 · ImageBaker · CNI 애드온화 · <b>(9.1)</b> 500클러스터·Fast Deploy·SR-IOV·Cilium</td></tr>
+            <tr><td>3.7</td><td>v1.36</td><td>5노드 CP · 네이티브 OIDC(CEL) · FIPS/TLS · 워커 250대 · <b>TKC API 제거</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">12</div></div>
+    </section>
+
+    <!-- 13 · Add-ons 생태계 -->
+    <section class="slide l-content" data-screen-label="13 Add-ons">
+      <div class="head"><h2>VKS Add-ons 생태계</h2><div class="sub">3.7부터 통합 프레임워크로 전환 · 4개 지원 티어 · VKr 24개월 라이프사이클 귀속</div></div>
+      <div class="body">
+        <svg class="slidesvg" style="max-height:130px" viewBox="0 0 1120 130">
+          <style>.et{fill:#1B1E35;font:700 14px Arial}.ed{fill:#6a6e80;font:600 12px Arial}</style>
+          <line x1="60" y1="62" x2="1060" y2="62" stroke="#cfd2dc" stroke-width="2"/>
+          <g text-anchor="middle">
+          <circle cx="90" cy="62" r="8" fill="#007A86"/><text x="90" y="40" class="et">Istio</text><text x="90" y="90" class="ed">25.6</text>
+          <circle cx="250" cy="62" r="8" fill="#007A86"/><text x="250" y="40" class="et">AKO</text><text x="250" y="90" class="ed">25.10</text>
+          <circle cx="410" cy="62" r="8" fill="#0193C2"/><text x="410" y="40" class="et">Vault·Prom-Op</text><text x="410" y="90" class="ed">26.2</text>
+          <circle cx="570" cy="62" r="8" fill="#EDB516"/><text x="570" y="40" class="et">Cilium</text><text x="570" y="90" class="ed">26.3</text>
+          <circle cx="730" cy="62" r="8" fill="#0193C2"/><text x="730" y="40" class="et">Helm Ctrl</text><text x="730" y="90" class="ed">26.4</text>
+          <circle cx="890" cy="62" r="8" fill="#6C4B8F"/><text x="890" y="40" class="et">Gatekeeper</text><text x="890" y="90" class="ed">26.5</text>
+          <circle cx="1040" cy="62" r="8" fill="#6C4B8F"/><text x="1035" y="40" class="et">Headlamp</text><text x="1035" y="90" class="ed">26.6</text>
+          </g>
+        </svg>
+        <table class="dtable">
+          <thead><tr><th style="width:16%">티어</th><th style="width:34%">소유/검증</th><th>Broadcom 지원 범위</th></tr></thead>
+          <tbody>
+            <tr><td>Product</td><td>Broadcom 엔지니어링 검증</td><td>배포+라이프사이클+<b>런타임까지 완전 지원</b></td></tr>
+            <tr><td>Partner</td><td>ISV 검증</td><td>배포·라이프사이클, 런타임은 파트너 에스컬레이션</td></tr>
+            <tr><td>Ecosystem</td><td>Broadcom 큐레이션 OSS</td><td>패키징·서명·라이프사이클만</td></tr>
+            <tr><td>Community</td><td>미검증 OSS</td><td>공식 지원 없음</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">13</div></div>
+    </section>
+
+    <!-- 14 · Big summary -->
+    <section class="slide l-big" data-screen-label="14 요약">
+      <div class="statement" style="top:200px">
+        <div class="eyebrow">Summary</div>
+        VKS는 가상화 인프라를 <em>통째로 쿠버네티스화</em>하여 VM·컨테이너를 하나로,<br>VCF 9.1은 <em>엣지 없는 네트워킹·70% 빠른 배포·500 스케일</em>로 이를 완성한다.
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">14</div></div>
+    </section>
+
+    <!-- 15 · Thanks -->
+    <section class="slide l-thanks" data-screen-label="15 Thanks">
+      <svg class="swoosh" style="left:0;top:0" width="520" height="720" viewBox="0 0 520 720" fill="none">
+        <defs><linearGradient id="gThx" x1="0" y1="720" x2="520" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/></linearGradient></defs>
+        <path d="M0 0 H520 C 340 60 270 180 270 380 C 270 560 200 680 0 720 Z" fill="url(#gThx)" opacity="0.12"/>
+      </svg>
+      <h2>감사합니다</h2>
+      <div class="contact">
+        <b>VKS — vSphere Kubernetes Service</b><br>
+        고객 소개 · 아키텍처 · VCF 9.1 · 버전별 3.5~3.7<br>
+        근거 · Broadcom TechDocs (VKS 3.5–3.7 릴리스노트 · VKS Add-ons · 에어갭 가이드)
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">15</div></div>
+    </section>
+
+  </div>
+</div>
+
+<nav class="nav">
+  <button id="prev" aria-label="Previous">‹</button>
+  <div class="dots" id="dots"></div>
+  <button id="next" aria-label="Next">›</button>
+</nav>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dotsBox = document.getElementById('dots');
+  var KEY = 'vks-deck-broadcom-pos';
+  var idx = 0;
+  var saved = parseInt(localStorage.getItem(KEY), 10);
+  if (!isNaN(saved) && saved >= 0 && saved < slides.length) idx = saved;
+
+  slides.forEach(function (_, i) {
+    var d = document.createElement('div');
+    d.className = 'dot' + (i === idx ? ' on' : '');
+    d.addEventListener('click', function () { go(i); });
+    dotsBox.appendChild(d);
+  });
+  var dots = Array.prototype.slice.call(dotsBox.children);
+
+  function go(i) {
+    idx = (i + slides.length) % slides.length;
+    slides.forEach(function (s, k) { s.classList.toggle('active', k === idx); });
+    dots.forEach(function (d, k) { d.classList.toggle('on', k === idx); });
+    try { localStorage.setItem(KEY, idx); } catch (e) {}
+  }
+  go(idx);
+  document.getElementById('prev').addEventListener('click', function () { go(idx - 1); });
+  document.getElementById('next').addEventListener('click', function () { go(idx + 1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') go(idx - 1);
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(idx + 1); }
+  });
+
+  function fit() {
+    var deck = document.getElementById('deck');
+    var de = document.documentElement;
+    var w = de.clientWidth || window.innerWidth;
+    var h = de.clientHeight || window.innerHeight;
+    var s = Math.min(w / 1280, h / 720) * 0.96;
+    deck.style.transform = 'scale(' + s + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+})();
+</script>
+</body>
+</html>
