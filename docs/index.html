@@ -1,4 +1,58 @@
-<!DOCTYPE html>
+<!doctype html>
+<html lang="ko">
+<head>
 <meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=VKS_AirGapped_VCF91_Deploy_KR.html">
-<a href="VKS_AirGapped_VCF91_Deploy_KR.html">VKS 에어갭 배포 가이드 (VCF 9.1) 슬라이드</a>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VKS Study — VCF 9.1</title>
+<style>
+  :root{
+    --navy:#1B1E35; --ink:#2c3047; --muted:#6a6e80; --canvas:#FBFBFC;
+    --surface:#F5F6F8; --border:#E3E5EC; --red:#CC092F; --red-ink:#A30726; --red-wash:#FCEEF1;
+    --font:Arial,"Helvetica Neue",Helvetica,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--font);color:var(--ink);background:var(--canvas);line-height:1.6;-webkit-font-smoothing:antialiased}
+  header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;padding:0 24px;gap:12px}
+  header .tick{width:4px;height:20px;background:var(--red);border-radius:2px}
+  header .mark{font-weight:700;color:var(--navy);font-size:15px}
+  header .mark span{font-weight:400;color:var(--muted)}
+  .wrap{max-width:840px;margin:0 auto;padding:56px 24px 100px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--red-ink);margin-bottom:14px}
+  h1{font-size:clamp(28px,4.4vw,42px);line-height:1.14;letter-spacing:-.02em;color:var(--navy);margin-bottom:14px}
+  p.lead{font-size:18px;color:var(--muted);margin-bottom:40px}
+  .grid{display:grid;gap:18px}
+  a.card{display:block;text-decoration:none;background:#fff;border:1px solid var(--border);border-left:3px solid var(--red);
+    border-radius:12px;padding:22px 24px;transition:box-shadow .15s,transform .15s,border-color .15s}
+  a.card:hover{box-shadow:0 10px 30px rgba(27,30,53,.10);transform:translateY(-2px)}
+  a.card .k{font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red-ink)}
+  a.card h2{font-size:20px;color:var(--navy);letter-spacing:-.01em;margin:8px 0 6px}
+  a.card p{font-size:15px;color:var(--muted);margin:0}
+  a.card .go{display:inline-block;margin-top:12px;font-size:13px;font-weight:700;color:var(--red-ink)}
+  footer{max-width:840px;margin:0 auto;padding:0 24px 60px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--border);padding-top:22px}
+</style>
+</head>
+<body>
+<header><span class="tick"></span><span class="mark">VKS Study <span>· VMware by Broadcom</span></span></header>
+<div class="wrap">
+  <span class="eyebrow">vSphere Kubernetes Service · VCF 9.1</span>
+  <h1>VKS on VCF 9.1 — 스터디 자료</h1>
+  <p class="lead">Broadcom 공개 TechDocs 기반의 학습용 정리 자료 모음입니다.</p>
+  <div class="grid">
+    <a class="card" href="VKS_VCF91_Overview.html">
+      <div class="k">Overview</div>
+      <h2>VKS 아키텍처 소개 &amp; 9.0 → 9.1 변경점</h2>
+      <p>VKS 아키텍처, VCF 9.0 대비 9.1 변경점 비교표, 9.1 신규 기능 하이라이트, 마이그레이션 유의점.</p>
+      <span class="go">자료 열기 →</span>
+    </a>
+    <a class="card" href="VKS_AirGapped_VCF91_Deploy_KR.html">
+      <div class="k">Deploy Guide</div>
+      <h2>VKS 에어갭(Air-Gapped) 배포 가이드 (VCF 9.1)</h2>
+      <p>인터넷 차단 환경에서 Software Depot 기반으로 Supervisor·VKS 워크로드를 구성하는 절차.</p>
+      <span class="go">자료 열기 →</span>
+    </a>
+  </div>
+</div>
+<footer>출처: Broadcom TechDocs — VKS 3.5 / 3.6 / 3.7 Release Notes, VCF 9.1 Air-Gapped Deploy Guide. 학습용 정리.</footer>
+</body>
+</html>
