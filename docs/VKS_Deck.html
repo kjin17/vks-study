@@ -368,35 +368,8 @@
       <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">5</div></div>
     </section>
 
-    <!-- 5 · 숫자 가치 + 도입 여정 (metrics + flow) -->
-    <section class="slide l-data" data-screen-label="06 숫자·여정">
-      <div class="head"><h2>숫자로 보는 가치 &amp; 도입 여정</h2><div class="sub">VCF 9.1 기준 성능·스케일과 3단계 도입 경로</div></div>
-      <div class="metrics">
-        <div class="metric leaf"><div class="big">70%<span style="font-size:20px">↓</span></div><div class="label">클러스터 프로비저닝</div><div class="desc">약 37 → 11분 · Fast Deploy</div></div>
-        <div class="metric aqua"><div class="big">500</div><div class="label">클러스터 / Supervisor</div><div class="desc">4,000 노드 · 워커 최대 250대</div></div>
-        <div class="metric plum"><div class="big">40%<span style="font-size:20px">↑</span></div><div class="label">네트워크 성능</div><div class="desc">Antrea 하이브리드 · DTGW Line-rate</div></div>
-      </div>
-      <svg class="slidesvg" style="position:absolute;left:64px;right:64px;top:400px;width:calc(100% - 128px);height:200px" viewBox="0 0 1120 200">
-        <style>.jt{fill:#1B1E35;font:700 20px Arial}.jd{fill:#4b4f63;font:400 14px Arial}.jn{fill:#fff;font:700 20px Arial}</style>
-        <g>
-          <circle cx="60" cy="60" r="24" fill="#0193C2"/><text x="60" y="67" text-anchor="middle" class="jn">1</text>
-          <text x="100" y="52" class="jt">활성화</text><text x="100" y="80" class="jd">VCF 9.1에서 Supervisor 활성화 (vCenter·NSX·스토리지)</text>
-          <line x1="60" y1="92" x2="60" y2="120" stroke="#cfd2dc" stroke-width="2"/>
-        </g>
-        <g transform="translate(0,0)">
-          <circle cx="60" cy="140" r="24" fill="#007A86"/><text x="60" y="147" text-anchor="middle" class="jn">2</text>
-          <text x="100" y="132" class="jt">네임스페이스 할당</text><text x="100" y="160" class="jd">팀·프로젝트별 vSphere Namespace 생성 → 쿼터·권한 부여</text>
-        </g>
-        <g transform="translate(580,0)">
-          <circle cx="60" cy="140" r="24" fill="#61A00A"/><text x="60" y="147" text-anchor="middle" class="jn">3</text>
-          <text x="100" y="132" class="jt">셀프서비스 배포</text><text x="100" y="160" class="jd">개발팀이 클러스터·VM·vPod을 K8s API로 온디맨드</text>
-        </g>
-      </svg>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">6</div></div>
-    </section>
-
     <!-- 6 · 아키텍처 다이어그램 -->
-    <section class="slide l-content" data-screen-label="07 아키텍처">
+    <section class="slide l-content" data-screen-label="06 아키텍처">
       <div class="head"><h2>VKS 아키텍처 — 계층 구조</h2><div class="sub">vSphere에 내장된 쿠버네티스 컨트롤 플레인 · 인프라부터 워크로드 클러스터까지</div></div>
       <div class="body diagram">
         <svg class="slidesvg" viewBox="0 0 1120 470">
@@ -431,11 +404,11 @@
           <text x="44" y="431" class="as">컴퓨트·스토리지·네트워크 기반 · 각 ESXi가 Spherelet(Kubelet의 vSphere 구현)으로 워커처럼 동작</text>
         </svg>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">7</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">6</div></div>
     </section>
 
     <!-- 7 · 인프라·Supervisor·VKS 계층 스택 -->
-    <section class="slide l-content" data-screen-label="08 계층 스택">
+    <section class="slide l-content" data-screen-label="07 계층 스택">
       <div class="head"><h2>인프라 · Supervisor · VKS 계층 스택</h2><div class="sub">아래에서 위로 — 하위 계층이 상위 계층을 떠받치고, 상위는 표준 K8s API로 소비한다</div></div>
       <div class="body diagram">
         <svg class="slidesvg" viewBox="0 0 1120 470">
@@ -483,11 +456,11 @@
           <text x="44" y="429" class="ss">각 ESXi가 Spherelet(Kubelet의 vSphere 구현)으로 워커 노드처럼 동작</text>
         </svg>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">8</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">7</div></div>
     </section>
 
     <!-- 8 · 구성요소 맵핑 (table) -->
-    <section class="slide l-data table-only" data-screen-label="09 맵핑">
+    <section class="slide l-data table-only" data-screen-label="08 맵핑">
       <div class="head"><h2>구성요소 맵핑 — K8s ↔ vSphere</h2><div class="sub">쿠버네티스 논리 구조가 vSphere 물리 자원에 그대로 대응된다</div></div>
       <table>
         <thead><tr><th style="width:24%">Kubernetes 개념</th><th style="width:30%">vSphere 구성요소</th><th>매핑 설명</th></tr></thead>
@@ -500,11 +473,11 @@
           <tr><td><b>CNI</b></td><td>NSX / VDS Networks</td><td>논리 스위치·LB·라우터로 가상화되어 패브릭에 매핑</td></tr>
         </tbody>
       </table>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">9</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">8</div></div>
     </section>
 
     <!-- 8 · 3가지 워크로드 (3 cards) -->
-    <section class="slide l-two" data-screen-label="10 워크로드">
+    <section class="slide l-two" data-screen-label="09 워크로드">
       <div class="head"><h2>Supervisor가 배포하는 3가지 워크로드</h2><div class="sub">전통 VM부터 하이퍼바이저 네이티브 Pod, 완전한 게스트 클러스터까지</div></div>
       <div class="cols three">
         <div class="card leaf"><span class="card-tag">VM Services</span><h3>전통 VM을 K8s API로</h3>
@@ -514,11 +487,11 @@
         <div class="card plum"><span class="card-tag">VKS Cluster</span><h3>Guest / TKG 클러스터</h3>
           <ul><li>독립적 <b>업스트림 K8s</b> 클러스터</li><li>CP+Worker 모두 VM·표준 K8s API 호환</li><li>멀티 테넌트·Helm/kubectl</li></ul></div>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">10</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">9</div></div>
     </section>
 
     <!-- 9 · Service & VKR (3 cards) -->
-    <section class="slide l-two" data-screen-label="11 Service·VKR">
+    <section class="slide l-two" data-screen-label="10 Service·VKR">
       <div class="head"><h2>Supervisor Service · VKS Service · VKR</h2><div class="sub">플랫폼 서비스 · 클러스터 수명주기 · 검증된 릴리스 번들</div></div>
       <div class="cols three">
         <div class="card leaf"><span class="card-tag">Supervisor Svc</span><h3>플랫폼 컨트롤 플레인</h3>
@@ -528,11 +501,11 @@
         <div class="card plum"><span class="card-tag">VKR / TKr</span><h3>릴리스 번들</h3>
           <ul><li><b>K8s+OS+애드온</b> 검증 패키지</li><li>CoreDNS·CNI·CSI 포함</li><li>버전 <b>파편화 방지</b> · 24개월 지원</li></ul></div>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">11</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">10</div></div>
     </section>
 
     <!-- 11 · VKR 라이프사이클 관리 주기 -->
-    <section class="slide l-content" data-screen-label="12 VKR 수명주기">
+    <section class="slide l-content" data-screen-label="11 VKR 수명주기">
       <div class="head"><h2>VKR 라이프사이클 관리 주기</h2><div class="sub">검증된 번들 릴리스 → 프로비저닝 → 운영 → 업그레이드 → 지원 종료가 24개월 주기로 순환</div></div>
       <div class="body diagram">
         <svg class="slidesvg" viewBox="0 0 1120 340">
@@ -606,11 +579,11 @@
           <text x="560" y="304" text-anchor="middle" class="lc">순환 — 새 VKr 릴리스로 이행 · 상시 최신 유지</text>
         </svg>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">12</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">11</div></div>
     </section>
 
     <!-- 13 · 손쉬운 업그레이드 라이프사이클 -->
-    <section class="slide l-content" data-screen-label="13 업그레이드">
+    <section class="slide l-content" data-screen-label="12 업그레이드">
       <div class="head"><h2>손쉬운 업그레이드 — VKr · Add-ons · 롤링 무중단</h2><div class="sub">컴포넌트 개별 호환성 검증에서 → 검증된 번들과 무중단 롤링 업그레이드로</div></div>
       <div class="body diagram">
         <svg class="slidesvg" viewBox="0 0 1120 400">
@@ -647,11 +620,11 @@
           <rect x="880" y="300" width="200" height="58" rx="9" fill="#eef6f7" stroke="#007A86"/><text x="980" y="326" text-anchor="middle" class="un" fill="#007A86">서비스 계속 가동</text><text x="980" y="345" text-anchor="middle" class="us">무중단 유지</text>
         </svg>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">13</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">12</div></div>
     </section>
 
     <!-- 13 · 외부 서비스 노출 (NSX ALB & Ingress) -->
-    <section class="slide l-content" data-screen-label="14 서비스 노출">
+    <section class="slide l-content" data-screen-label="13 서비스 노출">
       <div class="head"><h2>외부 서비스 노출 — NSX ALB &amp; 전용 Ingress</h2><div class="sub">NodePort·단일 Ingress에서 → NSX ALB LoadBalancer 서비스 + 클러스터별 전용 Ingress 컨트롤러로</div></div>
       <div class="body diagram">
         <svg class="slidesvg" viewBox="0 0 1120 380">
@@ -679,11 +652,11 @@
           <text x="600" y="300" class="nn" fill="#007A86">✓ L4–L7 로드밸런싱 · Shared VIP · 멀티테넌시(Avi 테넌트) · Gateway API</text>
         </svg>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">14</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">13</div></div>
     </section>
 
     <!-- 14 · NSX VPC 격리 네트워크 & 멀티테넌시 -->
-    <section class="slide l-content" data-screen-label="15 NSX VPC">
+    <section class="slide l-content" data-screen-label="14 NSX VPC">
       <div class="head"><h2>NSX VPC — 클러스터별 격리 네트워크 &amp; 완전한 멀티테넌시</h2><div class="sub">각 쿠버네티스 클러스터마다 독립된 Virtual Private Cloud → 테넌트 간 완전 격리</div></div>
       <div class="body diagram">
         <svg class="slidesvg" viewBox="0 0 1120 384">
@@ -731,11 +704,46 @@
           <text x="560" y="357" text-anchor="middle" class="vc" fill="#1B1E35">NSX 오버레이 · DTGW 물리 패브릭 <tspan class="vn">— 공용 언더레이 (VPC 간 완전 격리)</tspan></text>
         </svg>
       </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">14</div></div>
+    </section>
+
+    <!-- 5 · 숫자 가치 + 도입 여정 (metrics + flow) -->
+    <section class="slide l-data" data-screen-label="15 숫자·여정">
+      <div class="head"><h2>VCF 9.1 — 숫자로 보는 개선</h2><div class="sub">프로비저닝·스케일·네트워크 성능과 9.0 → 9.1 핵심 변화</div></div>
+      <div class="metrics">
+        <div class="metric leaf"><div class="big">70%<span style="font-size:20px">↓</span></div><div class="label">클러스터 프로비저닝</div><div class="desc">약 37 → 11분 · Fast Deploy</div></div>
+        <div class="metric aqua"><div class="big">500</div><div class="label">클러스터 / Supervisor</div><div class="desc">4,000 노드 · 워커 최대 250대</div></div>
+        <div class="metric plum"><div class="big">40%<span style="font-size:20px">↑</span></div><div class="label">네트워크 성능</div><div class="desc">Antrea 하이브리드 · DTGW Line-rate</div></div>
+      </div>
+      <table>
+        <thead><tr><th style="width:34%">추가 개선 항목</th><th style="width:26%">VCF 9.0</th><th>VCF 9.1</th></tr></thead>
+        <tbody>
+          <tr><td>클러스터 업그레이드 시간</td><td>기존</td><td><b>67% 단축</b></td></tr>
+          <tr><td>Max ESX 호스트</td><td>—</td><td><b>5,000대로 스케일 확장</b></td></tr>
+          <tr><td>Zone 아키텍처</td><td>기본 Zone</td><td><b>Custom Zone · 다중 클러스터 · AI GPU 격리</b></td></tr>
+          <tr><td>노드 풀 배치</td><td>수동 지정</td><td><b>지능형 배치 — DRS가 GPU·NVMe 자동 최적화</b></td></tr>
+        </tbody>
+      </table>
       <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">15</div></div>
     </section>
 
+    <!-- 15 · 9.1 신규기능 (bullets) -->
+    <section class="slide l-content" data-screen-label="16 9.1 기능">
+      <div class="head"><h2>VCF 9.1 신규 기능 &amp; 성능·스케일</h2><div class="sub">Zone·멀티네트워크·지능형 배치 + 구성 한도 확장</div></div>
+      <div class="body">
+        <ul>
+          <li><b>Enhanced Zone Architecture</b> — Zone당 여러 클러스터, 무중단 HW 교체·AI GPU용 Custom Zone</li>
+          <li><b>Multi Network</b> — 테넌트당 다중 Transit Gateway·외부 연결 · <b>Node Customization</b> TuneD·AppArmor</li>
+          <li><b>Intelligent Node Pool Placement</b> — vSphere DRS가 GPU·NVMe 요구 자동 분석·최적 배치</li>
+          <li><b>VCF Mgmt / VCFA</b> — FinOps 비용 분석·지속 컴플라이언스·블루프린트 셀프서비스</li>
+          <li><b>구성 한도</b> — Max ESX 5,000대 · Supervisor당 클러스터 100 → <b>500</b> · 프로비저닝 70%↓·업그레이드 67%↓</li>
+        </ul>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">16</div></div>
+    </section>
+
     <!-- 12 · VCF 9.1 DTGW diagram -->
-    <section class="slide l-content" data-screen-label="16 9.1 DTGW">
+    <section class="slide l-content" data-screen-label="17 9.1 DTGW">
       <div class="head"><h2>VCF 9.1 핵심 변화 — DTGW</h2><div class="sub">Distributed Transit Gateway — 전용 NSX Edge 노드 제거, Line-rate 성능</div></div>
       <div class="body diagram">
         <svg class="slidesvg" viewBox="0 0 1120 360">
@@ -756,21 +764,6 @@
           <line x1="740" y1="116" x2="740" y2="176" stroke="#007A86" stroke-width="4"/>
           <text x="620" y="270" class="fl" fill="#007A86">✓ 전용 Edge 노드 불필요 · 분산 브리징 · 성능 극대화</text>
         </svg>
-      </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">16</div></div>
-    </section>
-
-    <!-- 15 · 9.1 신규기능 (bullets) -->
-    <section class="slide l-content" data-screen-label="17 9.1 기능">
-      <div class="head"><h2>VCF 9.1 신규 기능 &amp; 성능·스케일</h2><div class="sub">Zone·멀티네트워크·지능형 배치 + 구성 한도 확장</div></div>
-      <div class="body">
-        <ul>
-          <li><b>Enhanced Zone Architecture</b> — Zone당 여러 클러스터, 무중단 HW 교체·AI GPU용 Custom Zone</li>
-          <li><b>Multi Network</b> — 테넌트당 다중 Transit Gateway·외부 연결 · <b>Node Customization</b> TuneD·AppArmor</li>
-          <li><b>Intelligent Node Pool Placement</b> — vSphere DRS가 GPU·NVMe 요구 자동 분석·최적 배치</li>
-          <li><b>VCF Mgmt / VCFA</b> — FinOps 비용 분석·지속 컴플라이언스·블루프린트 셀프서비스</li>
-          <li><b>구성 한도</b> — Max ESX 5,000대 · Supervisor당 클러스터 100 → <b>500</b> · 프로비저닝 70%↓·업그레이드 67%↓</li>
-        </ul>
       </div>
       <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">17</div></div>
     </section>
