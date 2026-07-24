@@ -624,8 +624,60 @@
       <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">13</div></div>
     </section>
 
-    <!-- 14 · 9.1 신규기능 (bullets) -->
-    <section class="slide l-content" data-screen-label="14 9.1 기능">
+    <!-- 14 · NSX VPC 격리 네트워크 & 멀티테넌시 -->
+    <section class="slide l-content" data-screen-label="14 NSX VPC">
+      <div class="head"><h2>NSX VPC — 클러스터별 격리 네트워크 &amp; 완전한 멀티테넌시</h2><div class="sub">각 쿠버네티스 클러스터마다 독립된 Virtual Private Cloud → 테넌트 간 완전 격리</div></div>
+      <div class="body diagram">
+        <svg class="slidesvg" viewBox="0 0 1120 384">
+          <style>
+            .vh{fill:#fff;font:700 15px Arial}.vt{fill:#1B1E35;font:700 13.5px Arial}.vs{fill:#6a6e80;font:600 11.5px Arial}
+            .vc{fill:#1B1E35;font:700 14px Arial}.vn{fill:#4b4f63;font:600 12px Arial}
+          </style>
+          <!-- VPC A (teal) -->
+          <rect x="30" y="14" width="340" height="288" rx="12" fill="#eef6f7" stroke="#007A86" stroke-width="1.5"/>
+          <rect x="30" y="14" width="340" height="36" rx="12" fill="#007A86"/><rect x="30" y="32" width="340" height="18" fill="#007A86"/>
+          <text x="50" y="38" class="vh">🔒 VPC · 테넌트 A</text>
+          <rect x="48" y="64" width="304" height="52" rx="8" fill="#fff" stroke="#b7d9dd"/><text x="64" y="86" class="vt">K8s 클러스터 A</text><text x="64" y="105" class="vs">전용 네임스페이스 · 워크로드</text>
+          <rect x="48" y="124" width="304" height="44" rx="8" fill="#fff" stroke="#b7d9dd"/><text x="64" y="151" class="vt">전용 서브넷 · IP 블록 <tspan class="vs">(Private/Public)</tspan></text>
+          <rect x="48" y="176" width="304" height="44" rx="8" fill="#fff" stroke="#b7d9dd"/><text x="64" y="203" class="vt">VPC Gateway <tspan class="vs">· NAT · 정적 라우팅</tspan></text>
+          <text x="48" y="248" class="vn" fill="#007A86">독립 보안정책 · 라우팅 도메인 · VPN</text>
+
+          <!-- VPC B (sky) -->
+          <rect x="390" y="14" width="340" height="288" rx="12" fill="#eff7fb" stroke="#0193C2" stroke-width="1.5"/>
+          <rect x="390" y="14" width="340" height="36" rx="12" fill="#0193C2"/><rect x="390" y="32" width="340" height="18" fill="#0193C2"/>
+          <text x="410" y="38" class="vh">🔒 VPC · 테넌트 B</text>
+          <rect x="408" y="64" width="304" height="52" rx="8" fill="#fff" stroke="#bfe2f2"/><text x="424" y="86" class="vt">K8s 클러스터 B</text><text x="424" y="105" class="vs">전용 네임스페이스 · 워크로드</text>
+          <rect x="408" y="124" width="304" height="44" rx="8" fill="#fff" stroke="#bfe2f2"/><text x="424" y="151" class="vt">전용 서브넷 · IP 블록 <tspan class="vs">(Private/Public)</tspan></text>
+          <rect x="408" y="176" width="304" height="44" rx="8" fill="#fff" stroke="#bfe2f2"/><text x="424" y="203" class="vt">VPC Gateway <tspan class="vs">· NAT · 정적 라우팅</tspan></text>
+          <text x="408" y="248" class="vn" fill="#0193C2">독립 보안정책 · 라우팅 도메인 · VPN</text>
+
+          <!-- VPC C (plum) -->
+          <rect x="750" y="14" width="340" height="288" rx="12" fill="#f5f1f9" stroke="#6C4B8F" stroke-width="1.5"/>
+          <rect x="750" y="14" width="340" height="36" rx="12" fill="#6C4B8F"/><rect x="750" y="32" width="340" height="18" fill="#6C4B8F"/>
+          <text x="770" y="38" class="vh">🔒 VPC · 테넌트 C</text>
+          <rect x="768" y="64" width="304" height="52" rx="8" fill="#fff" stroke="#d3c5e2"/><text x="784" y="86" class="vt">K8s 클러스터 C</text><text x="784" y="105" class="vs">전용 네임스페이스 · 워크로드</text>
+          <rect x="768" y="124" width="304" height="44" rx="8" fill="#fff" stroke="#d3c5e2"/><text x="784" y="151" class="vt">전용 서브넷 · IP 블록 <tspan class="vs">(Private/Public)</tspan></text>
+          <rect x="768" y="176" width="304" height="44" rx="8" fill="#fff" stroke="#d3c5e2"/><text x="784" y="203" class="vt">VPC Gateway <tspan class="vs">· NAT · 정적 라우팅</tspan></text>
+          <text x="768" y="248" class="vn" fill="#6C4B8F">독립 보안정책 · 라우팅 도메인 · VPN</text>
+
+          <!-- isolation dividers -->
+          <line x1="380" y1="60" x2="380" y2="296" stroke="#cfd2dc" stroke-width="2" stroke-dasharray="4 5"/>
+          <line x1="740" y1="60" x2="740" y2="296" stroke="#cfd2dc" stroke-width="2" stroke-dasharray="4 5"/>
+
+          <!-- connectors to shared underlay -->
+          <line x1="200" y1="302" x2="200" y2="326" stroke="#9aa0b4" stroke-width="2"/>
+          <line x1="560" y1="302" x2="560" y2="326" stroke="#9aa0b4" stroke-width="2"/>
+          <line x1="920" y1="302" x2="920" y2="326" stroke="#9aa0b4" stroke-width="2"/>
+          <!-- shared underlay -->
+          <rect x="30" y="328" width="1060" height="48" rx="10" fill="#f2f2f2" stroke="#cfd2dc"/>
+          <text x="560" y="357" text-anchor="middle" class="vc" fill="#1B1E35">NSX 오버레이 · DTGW 물리 패브릭 <tspan class="vn">— 공용 언더레이 (VPC 간 완전 격리)</tspan></text>
+        </svg>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">14</div></div>
+    </section>
+
+    <!-- 15 · 9.1 신규기능 (bullets) -->
+    <section class="slide l-content" data-screen-label="15 9.1 기능">
       <div class="head"><h2>VCF 9.1 신규 기능 &amp; 성능·스케일</h2><div class="sub">Zone·멀티네트워크·지능형 배치 + 구성 한도 확장</div></div>
       <div class="body">
         <ul>
@@ -636,11 +688,11 @@
           <li><b>구성 한도</b> — Max ESX 5,000대 · Supervisor당 클러스터 100 → <b>500</b> · 프로비저닝 70%↓·업그레이드 67%↓</li>
         </ul>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">14</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">15</div></div>
     </section>
 
     <!-- 12 · 버전 타임라인 + 표 -->
-    <section class="slide l-content" data-screen-label="15 버전">
+    <section class="slide l-content" data-screen-label="16 버전">
       <div class="head"><h2>버전별 변화 (VKS 3.5 → 3.7)</h2><div class="sub">각 메이저 버전은 이전 VKr 호환 제거 · ClusterClass 리베이스 필수</div></div>
       <div class="body">
         <svg class="slidesvg" style="max-height:150px" viewBox="0 0 1120 150">
@@ -659,11 +711,11 @@
           </tbody>
         </table>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">15</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">16</div></div>
     </section>
 
     <!-- 13 · Add-ons 생태계 -->
-    <section class="slide l-content" data-screen-label="16 Add-ons">
+    <section class="slide l-content" data-screen-label="17 Add-ons">
       <div class="head"><h2>VKS Add-ons 생태계</h2><div class="sub">3.7부터 통합 프레임워크로 전환 · 4개 지원 티어 · VKr 24개월 라이프사이클 귀속</div></div>
       <div class="body">
         <svg class="slidesvg" style="max-height:130px" viewBox="0 0 1120 130">
@@ -689,20 +741,20 @@
           </tbody>
         </table>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">16</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">17</div></div>
     </section>
 
     <!-- 14 · Big summary -->
-    <section class="slide l-big" data-screen-label="17 요약">
+    <section class="slide l-big" data-screen-label="18 요약">
       <div class="statement" style="top:200px">
         <div class="eyebrow">Summary</div>
         VKS는 가상화 인프라를 <em>통째로 쿠버네티스화</em>하여 VM·컨테이너를 하나로,<br>VCF 9.1은 <em>엣지 없는 네트워킹·70% 빠른 배포·500 스케일</em>로 이를 완성한다.
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">17</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">18</div></div>
     </section>
 
     <!-- 15 · Thanks -->
-    <section class="slide l-thanks" data-screen-label="18 Thanks">
+    <section class="slide l-thanks" data-screen-label="19 Thanks">
       <svg class="swoosh" style="left:0;top:0" width="520" height="720" viewBox="0 0 520 720" fill="none">
         <defs><linearGradient id="gThx" x1="0" y1="720" x2="520" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/></linearGradient></defs>
         <path d="M0 0 H520 C 340 60 270 180 270 380 C 270 560 200 680 0 720 Z" fill="url(#gThx)" opacity="0.12"/>
@@ -713,7 +765,7 @@
         고객 소개 · 아키텍처 · VCF 9.1 · 버전별 3.5~3.7<br>
         근거 · Broadcom TechDocs (VKS 3.5–3.7 릴리스노트 · VKS Add-ons · 에어갭 가이드)
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">18</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">19</div></div>
     </section>
 
   </div>
