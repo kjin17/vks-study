@@ -609,8 +609,49 @@
       <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">12</div></div>
     </section>
 
+    <!-- 13 · 손쉬운 업그레이드 라이프사이클 -->
+    <section class="slide l-content" data-screen-label="13 업그레이드">
+      <div class="head"><h2>손쉬운 업그레이드 — VKr · Add-ons · 롤링 무중단</h2><div class="sub">컴포넌트 개별 호환성 검증에서 → 검증된 번들과 무중단 롤링 업그레이드로</div></div>
+      <div class="body diagram">
+        <svg class="slidesvg" viewBox="0 0 1120 400">
+          <style>
+            .ut{fill:#1B1E35;font:700 17px Arial}.ul{fill:#4b4f63;font:600 13px Arial}
+            .un{font:700 12.5px Arial}.us{fill:#6a6e80;font:600 11.5px Arial}
+          </style>
+          <text x="20" y="26" class="ut">기존 — 컴포넌트별 개별 관리</text>
+          <rect x="20" y="42" width="500" height="150" rx="10" fill="#fff7d6" stroke="#EDB516"/>
+          <text x="40" y="72" class="ul" fill="#1B1E35" font-weight="700">K8s · CNI · CSI · CoreDNS · Ingress · 애드온</text>
+          <text x="40" y="98" class="ul">각 컴포넌트 버전 호환성 매트릭스를 수동 검증</text>
+          <text x="40" y="122" class="ul">의존성 · 업그레이드 순서를 직접 관리</text>
+          <text x="40" y="146" class="ul">개별 업그레이드 → 실수 시 장애·중단 위험</text>
+          <text x="40" y="176" class="un" fill="#9a7a00">⚠ 검증 부담 · 파편화 · 다운타임 리스크</text>
+
+          <line x1="560" y1="14" x2="560" y2="210" stroke="#e3e5ec" stroke-width="2"/>
+
+          <text x="600" y="26" class="ut" fill="#007A86">VKS — VKr + Add-ons 번들 제공</text>
+          <rect x="600" y="42" width="500" height="150" rx="10" fill="#eef6f7" stroke="#007A86"/>
+          <text x="620" y="72" class="ul" fill="#007A86" font-weight="700">VKr = 검증된 K8s + OS + 애드온 한 묶음</text>
+          <text x="620" y="98" class="ul">업그레이드 시 애드온 호환성 자동 pre-check</text>
+          <text x="620" y="122" class="ul">최신 호환 버전으로 애드온 자동 업그레이드</text>
+          <text x="620" y="146" class="ul">버전만 선택 → 운영 간편 · 파편화 방지</text>
+          <text x="620" y="176" class="un" fill="#007A86">✓ 24개월 지원 · AddonReconciled 가드레일</text>
+
+          <rect x="20" y="228" width="1080" height="150" rx="12" fill="#f6faf0" stroke="#61A00A" stroke-opacity=".5"/>
+          <text x="40" y="258" class="ut" fill="#4a7c00">롤링 업그레이드 — 무중단(Zero-downtime)</text>
+          <text x="40" y="280" class="us">노드를 하나씩 순차 교체 · PDB 가드레일로 파드 가용성 보장 → 서비스 계속 가동</text>
+          <rect x="300" y="300" width="150" height="58" rx="9" fill="#e0f0e0" stroke="#61A00A"/><text x="375" y="326" text-anchor="middle" class="un" fill="#4a7c00">노드1 ✓</text><text x="375" y="345" text-anchor="middle" class="us">v1.36 완료</text>
+          <path d="M456 329 h30" stroke="#9aa0b4" stroke-width="2"/><path d="M486 329 l-8 -5 v10 z" fill="#9aa0b4"/>
+          <rect x="492" y="300" width="150" height="58" rx="9" fill="#fff7d6" stroke="#EDB516"/><text x="567" y="326" text-anchor="middle" class="un" fill="#9a7a00">노드2 ⟳</text><text x="567" y="345" text-anchor="middle" class="us">교체 중</text>
+          <path d="M648 329 h30" stroke="#9aa0b4" stroke-width="2"/><path d="M678 329 l-8 -5 v10 z" fill="#9aa0b4"/>
+          <rect x="684" y="300" width="150" height="58" rx="9" fill="#f2f2f2" stroke="#cfd2dc"/><text x="759" y="326" text-anchor="middle" class="un" fill="#6a6e80">노드3</text><text x="759" y="345" text-anchor="middle" class="us">v1.35 대기</text>
+          <rect x="880" y="300" width="200" height="58" rx="9" fill="#eef6f7" stroke="#007A86"/><text x="980" y="326" text-anchor="middle" class="un" fill="#007A86">서비스 계속 가동</text><text x="980" y="345" text-anchor="middle" class="us">무중단 유지</text>
+        </svg>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">13</div></div>
+    </section>
+
     <!-- 12 · VCF 9.1 DTGW diagram -->
-    <section class="slide l-content" data-screen-label="13 9.1 DTGW">
+    <section class="slide l-content" data-screen-label="14 9.1 DTGW">
       <div class="head"><h2>VCF 9.1 핵심 변화 — DTGW</h2><div class="sub">Distributed Transit Gateway — 전용 NSX Edge 노드 제거, Line-rate 성능</div></div>
       <div class="body diagram">
         <svg class="slidesvg" viewBox="0 0 1120 360">
@@ -632,11 +673,11 @@
           <text x="620" y="270" class="fl" fill="#007A86">✓ 전용 Edge 노드 불필요 · 분산 브리징 · 성능 극대화</text>
         </svg>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">13</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">14</div></div>
     </section>
 
     <!-- 13 · 외부 서비스 노출 (NSX ALB & Ingress) -->
-    <section class="slide l-content" data-screen-label="14 서비스 노출">
+    <section class="slide l-content" data-screen-label="15 서비스 노출">
       <div class="head"><h2>외부 서비스 노출 — NSX ALB &amp; 전용 Ingress</h2><div class="sub">NodePort·단일 Ingress에서 → NSX ALB LoadBalancer 서비스 + 클러스터별 전용 Ingress 컨트롤러로</div></div>
       <div class="body diagram">
         <svg class="slidesvg" viewBox="0 0 1120 380">
@@ -664,11 +705,11 @@
           <text x="600" y="300" class="nn" fill="#007A86">✓ L4–L7 로드밸런싱 · Shared VIP · 멀티테넌시(Avi 테넌트) · Gateway API</text>
         </svg>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">14</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">15</div></div>
     </section>
 
     <!-- 14 · NSX VPC 격리 네트워크 & 멀티테넌시 -->
-    <section class="slide l-content" data-screen-label="15 NSX VPC">
+    <section class="slide l-content" data-screen-label="16 NSX VPC">
       <div class="head"><h2>NSX VPC — 클러스터별 격리 네트워크 &amp; 완전한 멀티테넌시</h2><div class="sub">각 쿠버네티스 클러스터마다 독립된 Virtual Private Cloud → 테넌트 간 완전 격리</div></div>
       <div class="body diagram">
         <svg class="slidesvg" viewBox="0 0 1120 384">
@@ -716,11 +757,11 @@
           <text x="560" y="357" text-anchor="middle" class="vc" fill="#1B1E35">NSX 오버레이 · DTGW 물리 패브릭 <tspan class="vn">— 공용 언더레이 (VPC 간 완전 격리)</tspan></text>
         </svg>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">15</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">16</div></div>
     </section>
 
     <!-- 15 · 9.1 신규기능 (bullets) -->
-    <section class="slide l-content" data-screen-label="16 9.1 기능">
+    <section class="slide l-content" data-screen-label="17 9.1 기능">
       <div class="head"><h2>VCF 9.1 신규 기능 &amp; 성능·스케일</h2><div class="sub">Zone·멀티네트워크·지능형 배치 + 구성 한도 확장</div></div>
       <div class="body">
         <ul>
@@ -731,11 +772,11 @@
           <li><b>구성 한도</b> — Max ESX 5,000대 · Supervisor당 클러스터 100 → <b>500</b> · 프로비저닝 70%↓·업그레이드 67%↓</li>
         </ul>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">16</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">17</div></div>
     </section>
 
     <!-- 12 · 버전 타임라인 + 표 -->
-    <section class="slide l-content" data-screen-label="17 버전">
+    <section class="slide l-content" data-screen-label="18 버전">
       <div class="head"><h2>버전별 변화 (VKS 3.5 → 3.7)</h2><div class="sub">각 메이저 버전은 이전 VKr 호환 제거 · ClusterClass 리베이스 필수</div></div>
       <div class="body">
         <svg class="slidesvg" style="max-height:150px" viewBox="0 0 1120 150">
@@ -754,11 +795,11 @@
           </tbody>
         </table>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">17</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">18</div></div>
     </section>
 
     <!-- 13 · Add-ons 생태계 -->
-    <section class="slide l-content" data-screen-label="18 Add-ons">
+    <section class="slide l-content" data-screen-label="19 Add-ons">
       <div class="head"><h2>VKS Add-ons 생태계</h2><div class="sub">3.7부터 통합 프레임워크로 전환 · 4개 지원 티어 · VKr 24개월 라이프사이클 귀속</div></div>
       <div class="body">
         <svg class="slidesvg" style="max-height:130px" viewBox="0 0 1120 130">
@@ -784,20 +825,20 @@
           </tbody>
         </table>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">18</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">19</div></div>
     </section>
 
     <!-- 14 · Big summary -->
-    <section class="slide l-big" data-screen-label="19 요약">
+    <section class="slide l-big" data-screen-label="20 요약">
       <div class="statement" style="top:200px">
         <div class="eyebrow">Summary</div>
         VKS는 가상화 인프라를 <em>통째로 쿠버네티스화</em>하여 VM·컨테이너를 하나로,<br>VCF 9.1은 <em>엣지 없는 네트워킹·70% 빠른 배포·500 스케일</em>로 이를 완성한다.
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">19</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">20</div></div>
     </section>
 
     <!-- 15 · Thanks -->
-    <section class="slide l-thanks" data-screen-label="20 Thanks">
+    <section class="slide l-thanks" data-screen-label="21 Thanks">
       <svg class="swoosh" style="left:0;top:0" width="520" height="720" viewBox="0 0 520 720" fill="none">
         <defs><linearGradient id="gThx" x1="0" y1="720" x2="520" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/></linearGradient></defs>
         <path d="M0 0 H520 C 340 60 270 180 270 380 C 270 560 200 680 0 720 Z" fill="url(#gThx)" opacity="0.12"/>
@@ -808,7 +849,7 @@
         고객 소개 · 아키텍처 · VCF 9.1 · 버전별 3.5~3.7<br>
         근거 · Broadcom TechDocs (VKS 3.5–3.7 릴리스노트 · VKS Add-ons · 에어갭 가이드)
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">20</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">21</div></div>
     </section>
 
   </div>
