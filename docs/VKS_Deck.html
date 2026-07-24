@@ -391,8 +391,60 @@
       <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">6</div></div>
     </section>
 
-    <!-- 7 · 구성요소 맵핑 (table) -->
-    <section class="slide l-data table-only" data-screen-label="07 맵핑">
+    <!-- 7 · 인프라·Supervisor·VKS 계층 스택 -->
+    <section class="slide l-content" data-screen-label="07 계층 스택">
+      <div class="head"><h2>인프라 · Supervisor · VKS 계층 스택</h2><div class="sub">아래에서 위로 — 하위 계층이 상위 계층을 떠받치고, 상위는 표준 K8s API로 소비한다</div></div>
+      <div class="body diagram">
+        <svg class="slidesvg" viewBox="0 0 1120 470">
+          <style>
+            .st{fill:#1B1E35;font:700 21px Arial}.ss{fill:#4b4f63;font:400 13.5px Arial}
+            .sn{fill:#1B1E35;font:700 15px Arial}.sw{fill:#6a6e80;font:700 11px Arial;letter-spacing:1.5px}
+            .sp{font:700 11px Arial;letter-spacing:.5px}.sa{fill:#6a6e80;font:600 12px Arial}
+          </style>
+          <!-- TOP: VKS -->
+          <rect x="20" y="16" width="1040" height="150" rx="14" fill="#f3eef7" stroke="#6C4B8F" stroke-opacity=".45"/>
+          <rect x="20" y="16" width="8" height="150" rx="4" fill="#6C4B8F"/>
+          <text x="44" y="44" class="sw">LAYER 3 · 소비 (개발팀 · 플랫폼 사용자)</text>
+          <text x="44" y="72" class="st" fill="#6C4B8F">VKS — vSphere Kubernetes Service</text>
+          <text x="44" y="94" class="ss">Supervisor가 배포하는 워크로드 · 표준 K8s API로 온디맨드 셀프서비스</text>
+          <rect x="44" y="108" width="320" height="46" rx="9" fill="#fff" stroke="#cbb8de"/><text x="60" y="136" class="sn">VKS Cluster</text><text x="200" y="136" class="ss">Guest/TKG · 업스트림 K8s</text>
+          <rect x="380" y="108" width="300" height="46" rx="9" fill="#fff" stroke="#cbb8de"/><text x="396" y="136" class="sn">vPod</text><text x="470" y="136" class="ss">ESXi 네이티브 Pod</text>
+          <rect x="696" y="108" width="340" height="46" rx="9" fill="#fff" stroke="#cbb8de"/><text x="712" y="136" class="sn">VM Services</text><text x="850" y="136" class="ss">VM을 K8s API로 관리</text>
+
+          <!-- arrow between L3-L2 (bidirectional) -->
+          <path d="M556 166 L556 186" stroke="#9aa0b4" stroke-width="2.5"/><path d="M556 186 l-6 -9 h12 z" fill="#9aa0b4"/>
+          <text x="574" y="184" class="sa">프로비저닝 · 라이프사이클 ▼</text>
+          <path d="M540 186 L540 166" stroke="#007A86" stroke-width="2.5"/><path d="M540 166 l-6 9 h12 z" fill="#007A86"/>
+          <text x="524" y="184" class="sa" text-anchor="end" fill="#007A86">▲ K8s API</text>
+
+          <!-- MID: Supervisor -->
+          <rect x="20" y="192" width="1040" height="112" rx="14" fill="#eef6f7" stroke="#007A86" stroke-opacity=".45"/>
+          <rect x="20" y="192" width="8" height="112" rx="4" fill="#007A86"/>
+          <text x="44" y="219" class="sw">LAYER 2 · 제어 (플랫폼 운영자)</text>
+          <text x="44" y="247" class="st" fill="#007A86">Supervisor — 관리용 K8s 컨트롤 플레인</text>
+          <text x="44" y="271" class="ss">vCenter 내 프로비저닝 · vSphere Namespace로 테넌시·쿼터·정책 경계</text>
+          <text x="44" y="291" class="ss">VKS Service(클러스터 수명주기 자동화) · CAPI/CAPV + ClusterClass</text>
+
+          <!-- arrow between L2-L1 (bidirectional) -->
+          <path d="M556 304 L556 324" stroke="#9aa0b4" stroke-width="2.5"/><path d="M556 324 l-6 -9 h12 z" fill="#9aa0b4"/>
+          <text x="574" y="322" class="sa">스케줄링 · Spherelet ▼</text>
+          <path d="M540 324 L540 304" stroke="#007A86" stroke-width="2.5"/><path d="M540 304 l-6 9 h12 z" fill="#007A86"/>
+          <text x="524" y="322" class="sa" text-anchor="end" fill="#007A86">▲ 컴퓨트·스토리지·네트워크</text>
+
+          <!-- BOT: Infrastructure -->
+          <rect x="20" y="330" width="1040" height="124" rx="14" fill="#f2f2f2" stroke="#cfd2dc"/>
+          <rect x="20" y="330" width="8" height="124" rx="4" fill="#8a8d9c"/>
+          <text x="44" y="357" class="sw">LAYER 1 · 인프라 (인프라팀)</text>
+          <text x="44" y="385" class="st">Infrastructure — vSphere / ESXi</text>
+          <text x="44" y="409" class="ss">컴퓨트 · 스토리지(vSAN/VMFS/NFS) · 네트워크(NSX/VDS) 물리 기반</text>
+          <text x="44" y="429" class="ss">각 ESXi가 Spherelet(Kubelet의 vSphere 구현)으로 워커 노드처럼 동작</text>
+        </svg>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">7</div></div>
+    </section>
+
+    <!-- 8 · 구성요소 맵핑 (table) -->
+    <section class="slide l-data table-only" data-screen-label="08 맵핑">
       <div class="head"><h2>구성요소 맵핑 — K8s ↔ vSphere</h2><div class="sub">쿠버네티스 논리 구조가 vSphere 물리 자원에 그대로 대응된다</div></div>
       <table>
         <thead><tr><th style="width:24%">Kubernetes 개념</th><th style="width:30%">vSphere 구성요소</th><th>매핑 설명</th></tr></thead>
@@ -405,11 +457,11 @@
           <tr><td><b>CNI</b></td><td>NSX / VDS Networks</td><td>논리 스위치·LB·라우터로 가상화되어 패브릭에 매핑</td></tr>
         </tbody>
       </table>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">7</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">8</div></div>
     </section>
 
     <!-- 8 · 3가지 워크로드 (3 cards) -->
-    <section class="slide l-two" data-screen-label="08 워크로드">
+    <section class="slide l-two" data-screen-label="09 워크로드">
       <div class="head"><h2>Supervisor가 배포하는 3가지 워크로드</h2><div class="sub">전통 VM부터 하이퍼바이저 네이티브 Pod, 완전한 게스트 클러스터까지</div></div>
       <div class="cols three">
         <div class="card leaf"><span class="card-tag">VM Services</span><h3>전통 VM을 K8s API로</h3>
@@ -419,11 +471,11 @@
         <div class="card plum"><span class="card-tag">VKS Cluster</span><h3>Guest / TKG 클러스터</h3>
           <ul><li>독립적 <b>업스트림 K8s</b> 클러스터</li><li>CP+Worker 모두 VM·표준 K8s API 호환</li><li>멀티 테넌트·Helm/kubectl</li></ul></div>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">8</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">9</div></div>
     </section>
 
     <!-- 9 · Service & VKR (3 cards) -->
-    <section class="slide l-two" data-screen-label="09 Service·VKR">
+    <section class="slide l-two" data-screen-label="10 Service·VKR">
       <div class="head"><h2>Supervisor Service · VKS Service · VKR</h2><div class="sub">플랫폼 서비스 · 클러스터 수명주기 · 검증된 릴리스 번들</div></div>
       <div class="cols three">
         <div class="card leaf"><span class="card-tag">Supervisor Svc</span><h3>플랫폼 컨트롤 플레인</h3>
@@ -433,11 +485,89 @@
         <div class="card plum"><span class="card-tag">VKR / TKr</span><h3>릴리스 번들</h3>
           <ul><li><b>K8s+OS+애드온</b> 검증 패키지</li><li>CoreDNS·CNI·CSI 포함</li><li>버전 <b>파편화 방지</b> · 24개월 지원</li></ul></div>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">9</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">10</div></div>
     </section>
 
-    <!-- 10 · VCF 9.1 DTGW diagram -->
-    <section class="slide l-content" data-screen-label="10 9.1 DTGW">
+    <!-- 11 · VKR 라이프사이클 관리 주기 -->
+    <section class="slide l-content" data-screen-label="11 VKR 수명주기">
+      <div class="head"><h2>VKR 라이프사이클 관리 주기</h2><div class="sub">검증된 번들 릴리스 → 프로비저닝 → 운영 → 업그레이드 → 지원 종료가 24개월 주기로 순환</div></div>
+      <div class="body diagram">
+        <svg class="slidesvg" viewBox="0 0 1120 340">
+          <defs>
+            <marker id="ahR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#9aa0b4"/>
+            </marker>
+            <marker id="ahLoop" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#EDB516"/>
+            </marker>
+          </defs>
+          <style>
+            .lt{fill:#1B1E35;font:700 15px Arial}.ld{fill:#4b4f63;font:400 11.5px Arial}
+            .ln{fill:#fff;font:700 15px Arial}.lc{fill:#9a7a00;font:700 13px Arial}
+          </style>
+
+          <!-- Stage 1 · 릴리스 -->
+          <rect x="22" y="70" width="196" height="150" rx="12" fill="#f6faf0" stroke="#e3e5ec"/>
+          <rect x="22" y="70" width="196" height="6" rx="3" fill="#61A00A"/>
+          <circle cx="54" cy="108" r="17" fill="#61A00A"/><text x="54" y="114" text-anchor="middle" class="ln">1</text>
+          <text x="80" y="114" class="lt">릴리스</text>
+          <text x="38" y="148" class="ld">검증된 VKr 번들 발행</text>
+          <text x="38" y="168" class="ld">K8s + OS + 애드온 통합</text>
+          <text x="38" y="188" class="ld">24개월 지원 시작</text>
+
+          <!-- Stage 2 · 프로비저닝 -->
+          <rect x="238" y="70" width="196" height="150" rx="12" fill="#eff8fa" stroke="#e3e5ec"/>
+          <rect x="238" y="70" width="196" height="6" rx="3" fill="#007A86"/>
+          <circle cx="270" cy="108" r="17" fill="#007A86"/><text x="270" y="114" text-anchor="middle" class="ln">2</text>
+          <text x="296" y="114" class="lt">프로비저닝</text>
+          <text x="254" y="148" class="ld">ClusterClass로 클러스터</text>
+          <text x="254" y="168" class="ld">생성 (builtin-generic)</text>
+          <text x="254" y="188" class="ld">CAPI/CAPV 선언형 관리</text>
+
+          <!-- Stage 3 · 운영 -->
+          <rect x="454" y="70" width="196" height="150" rx="12" fill="#eff7fb" stroke="#e3e5ec"/>
+          <rect x="454" y="70" width="196" height="6" rx="3" fill="#0193C2"/>
+          <circle cx="486" cy="108" r="17" fill="#0193C2"/><text x="486" y="114" text-anchor="middle" class="ln">3</text>
+          <text x="512" y="114" class="lt">운영</text>
+          <text x="470" y="148" class="ld">애드온 자동 호환 관리</text>
+          <text x="470" y="168" class="ld">AddonReconciled 집계</text>
+          <text x="470" y="188" class="ld">CIS/STIG · PDB 정책</text>
+
+          <!-- Stage 4 · 업그레이드 -->
+          <rect x="670" y="70" width="196" height="150" rx="12" fill="#fef9ec" stroke="#e3e5ec"/>
+          <rect x="670" y="70" width="196" height="6" rx="3" fill="#EDB516"/>
+          <circle cx="702" cy="108" r="17" fill="#EDB516"/><text x="702" y="114" text-anchor="middle" class="ln">4</text>
+          <text x="728" y="114" class="lt">업그레이드</text>
+          <text x="686" y="148" class="ld">호환성 pre-check</text>
+          <text x="686" y="168" class="ld">PDB 가드레일 통과</text>
+          <text x="686" y="188" class="ld">ClusterClass 리베이스</text>
+
+          <!-- Stage 5 · 지원 종료 -->
+          <rect x="886" y="70" width="196" height="150" rx="12" fill="#f6f2fa" stroke="#e3e5ec"/>
+          <rect x="886" y="70" width="196" height="6" rx="3" fill="#6C4B8F"/>
+          <circle cx="918" cy="108" r="17" fill="#6C4B8F"/><text x="918" y="114" text-anchor="middle" class="ln">5</text>
+          <text x="944" y="114" class="lt">지원 종료</text>
+          <text x="902" y="148" class="ld">N-2 이전 VKr 제거</text>
+          <text x="902" y="168" class="ld">24개월 주기 만료</text>
+          <text x="902" y="188" class="ld">→ 새 VKr로 이행</text>
+
+          <!-- forward arrows -->
+          <line x1="220" y1="145" x2="236" y2="145" stroke="#9aa0b4" stroke-width="2.5" marker-end="url(#ahR)"/>
+          <line x1="436" y1="145" x2="452" y2="145" stroke="#9aa0b4" stroke-width="2.5" marker-end="url(#ahR)"/>
+          <line x1="652" y1="145" x2="668" y2="145" stroke="#9aa0b4" stroke-width="2.5" marker-end="url(#ahR)"/>
+          <line x1="868" y1="145" x2="884" y2="145" stroke="#9aa0b4" stroke-width="2.5" marker-end="url(#ahR)"/>
+
+          <!-- loop-back (cycle) -->
+          <path d="M984 220 C 984 300, 120 300, 120 224" fill="none" stroke="#EDB516" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#ahLoop)"/>
+          <rect x="430" y="286" width="260" height="26" rx="13" fill="#fdf6e3" stroke="#f0d98a"/>
+          <text x="560" y="304" text-anchor="middle" class="lc">순환 — 새 VKr 릴리스로 이행 · 상시 최신 유지</text>
+        </svg>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">11</div></div>
+    </section>
+
+    <!-- 12 · VCF 9.1 DTGW diagram -->
+    <section class="slide l-content" data-screen-label="12 9.1 DTGW">
       <div class="head"><h2>VCF 9.1 핵심 변화 — DTGW</h2><div class="sub">Distributed Transit Gateway — 전용 NSX Edge 노드 제거, Line-rate 성능</div></div>
       <div class="body diagram">
         <svg class="slidesvg" viewBox="0 0 1120 360">
@@ -459,11 +589,11 @@
           <text x="620" y="270" class="fl" fill="#007A86">✓ 전용 Edge 노드 불필요 · 분산 브리징 · 성능 극대화</text>
         </svg>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">10</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">12</div></div>
     </section>
 
     <!-- 11 · 9.1 신규기능 (bullets) -->
-    <section class="slide l-content" data-screen-label="11 9.1 기능">
+    <section class="slide l-content" data-screen-label="13 9.1 기능">
       <div class="head"><h2>VCF 9.1 신규 기능 &amp; 성능·스케일</h2><div class="sub">Zone·멀티네트워크·지능형 배치 + 구성 한도 확장</div></div>
       <div class="body">
         <ul>
@@ -474,11 +604,11 @@
           <li><b>구성 한도</b> — Max ESX 5,000대 · Supervisor당 클러스터 100 → <b>500</b> · 프로비저닝 70%↓·업그레이드 67%↓</li>
         </ul>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">11</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">13</div></div>
     </section>
 
     <!-- 12 · 버전 타임라인 + 표 -->
-    <section class="slide l-content" data-screen-label="12 버전">
+    <section class="slide l-content" data-screen-label="14 버전">
       <div class="head"><h2>버전별 변화 (VKS 3.5 → 3.7)</h2><div class="sub">각 메이저 버전은 이전 VKr 호환 제거 · ClusterClass 리베이스 필수</div></div>
       <div class="body">
         <svg class="slidesvg" style="max-height:150px" viewBox="0 0 1120 150">
@@ -497,11 +627,11 @@
           </tbody>
         </table>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">12</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">14</div></div>
     </section>
 
     <!-- 13 · Add-ons 생태계 -->
-    <section class="slide l-content" data-screen-label="13 Add-ons">
+    <section class="slide l-content" data-screen-label="15 Add-ons">
       <div class="head"><h2>VKS Add-ons 생태계</h2><div class="sub">3.7부터 통합 프레임워크로 전환 · 4개 지원 티어 · VKr 24개월 라이프사이클 귀속</div></div>
       <div class="body">
         <svg class="slidesvg" style="max-height:130px" viewBox="0 0 1120 130">
@@ -527,20 +657,20 @@
           </tbody>
         </table>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">13</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">15</div></div>
     </section>
 
     <!-- 14 · Big summary -->
-    <section class="slide l-big" data-screen-label="14 요약">
+    <section class="slide l-big" data-screen-label="16 요약">
       <div class="statement" style="top:200px">
         <div class="eyebrow">Summary</div>
         VKS는 가상화 인프라를 <em>통째로 쿠버네티스화</em>하여 VM·컨테이너를 하나로,<br>VCF 9.1은 <em>엣지 없는 네트워킹·70% 빠른 배포·500 스케일</em>로 이를 완성한다.
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">14</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">16</div></div>
     </section>
 
     <!-- 15 · Thanks -->
-    <section class="slide l-thanks" data-screen-label="15 Thanks">
+    <section class="slide l-thanks" data-screen-label="17 Thanks">
       <svg class="swoosh" style="left:0;top:0" width="520" height="720" viewBox="0 0 520 720" fill="none">
         <defs><linearGradient id="gThx" x1="0" y1="720" x2="520" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/></linearGradient></defs>
         <path d="M0 0 H520 C 340 60 270 180 270 380 C 270 560 200 680 0 720 Z" fill="url(#gThx)" opacity="0.12"/>
@@ -551,7 +681,7 @@
         고객 소개 · 아키텍처 · VCF 9.1 · 버전별 3.5~3.7<br>
         근거 · Broadcom TechDocs (VKS 3.5–3.7 릴리스노트 · VKS Add-ons · 에어갭 가이드)
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">15</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">17</div></div>
     </section>
 
   </div>
