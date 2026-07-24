@@ -729,14 +729,15 @@
 
     <!-- 15 · 9.1 신규기능 (bullets) -->
     <section class="slide l-content" data-screen-label="16 9.1 기능">
-      <div class="head"><h2>VCF 9.1 신규 기능 &amp; 성능·스케일</h2><div class="sub">Zone·멀티네트워크·지능형 배치 + 구성 한도 확장</div></div>
+      <div class="head"><h2>VCF 9.1 신규 기능</h2><div class="sub">Zone·네트워킹·노드 커스터마이징·거버넌스 등 플랫폼 전반 개선 (성능 수치는 앞 페이지 참고)</div></div>
       <div class="body">
         <ul>
-          <li><b>Enhanced Zone Architecture</b> — Zone당 여러 클러스터, 무중단 HW 교체·AI GPU용 Custom Zone</li>
-          <li><b>Multi Network</b> — 테넌트당 다중 Transit Gateway·외부 연결 · <b>Node Customization</b> TuneD·AppArmor</li>
-          <li><b>Intelligent Node Pool Placement</b> — vSphere DRS가 GPU·NVMe 요구 자동 분석·최적 배치</li>
-          <li><b>VCF Mgmt / VCFA</b> — FinOps 비용 분석·지속 컴플라이언스·블루프린트 셀프서비스</li>
-          <li><b>구성 한도</b> — Max ESX 5,000대 · Supervisor당 클러스터 100 → <b>500</b> · 프로비저닝 70%↓·업그레이드 67%↓</li>
+          <li><b>Enhanced Zone Architecture</b> — Zone당 여러 클러스터·무중단 HW 교체, AI GPU 전용 <b>Custom Zone</b>으로 워크로드 격리</li>
+          <li><b>Multi Network</b> — VKS 클러스터에 테넌트당 다중 Transit Gateway·격리 VPN·정적 라우팅·맞춤 NAT</li>
+          <li><b>Node Customization &amp; CNI 선택</b> — TuneD 커널 프로파일·AppArmor 보안 프로파일 · 요구사항별 CNI 유연 선택·네트워킹 애드온</li>
+          <li><b>Intelligent Node Pool Placement</b> — vSphere DRS가 GPU·NVMe 요구를 자동 분석해 최적 호스트에 배치</li>
+          <li><b>VCF Mgmt / VCFA</b> — FinOps 비용 분석(Cost Showback) · 지속 컴플라이언스(구성 Drift 자동 교정)</li>
+          <li><b>VCFA BluePrint 카탈로그</b> — 관리자 개입 없이 셀프서비스로 클러스터 프로비저닝·DR 복제</li>
         </ul>
       </div>
       <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">16</div></div>
@@ -791,8 +792,28 @@
       <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">18</div></div>
     </section>
 
+    <!-- 19 · 버전별 기능 추가·개선 상세 -->
+    <section class="slide l-content" data-screen-label="19 버전 상세">
+      <div class="head"><h2>VKS 버전별 기능 추가·개선 (3.5 → 3.6 → 3.7)</h2><div class="sub">메이저 업그레이드마다 더해진 코어·보안·네트워킹·스케일·애드온</div></div>
+      <div class="body">
+        <style>.vdet th,.vdet td{font-size:12px;padding:7px 12px}.vdet td:first-child{color:#1B1E35}</style>
+        <table class="dtable vdet">
+          <thead><tr><th style="width:13%">영역</th><th style="width:29%">3.5 · K8s 1.34</th><th style="width:29%">3.6 · K8s 1.35</th><th>3.7 · K8s 1.36</th></tr></thead>
+          <tbody>
+            <tr><td>코어 &amp; API</td><td>Cluster API v1beta2 자동 전환</td><td>RHEL 노드 · ImageBaker · CNI 애드온화</td><td>5노드 컨트롤 플레인 · CAPI v1.13 · 인플레이스 노드 업데이트</td></tr>
+            <tr><td>보안 &amp; 인증</td><td>CIS/STIG 구성변수 · PDB 가드레일</td><td>TuneD · AppArmor · EncryptionClass · 계층적 CA</td><td>네이티브 OIDC(CEL) · FIPS 기본 · TLS 프로파일</td></tr>
+            <tr><td>네트워킹</td><td>AddonRepository API</td><td>멀티네트워크 · SR-IOV · Antrea 하이브리드 · Cilium</td><td>kube-proxy 비활성화 · SR-IOV VF(DPDK) · CIDR 검증</td></tr>
+            <tr><td>스케일 &amp; 성능</td><td>—</td><td>500 클러스터 · 4,000노드 · Fast Deploy(70%↓)</td><td>워커 250대 · 업그레이드 롤아웃 개선</td></tr>
+            <tr><td>애드온 &amp; CLI</td><td>addon 플러그인 · support-bundle</td><td>AddonConfig · Late-Binding SC</td><td>VKS Add-ons 리브랜딩 · Helm · Gateway API · Multus/Headlamp</td></tr>
+          </tbody>
+        </table>
+        <div class="callout tip" style="margin-top:16px"><div class="ico">i</div><div>각 메이저 버전은 이전 VKr 호환을 순차 제거(3.5→1.31, 3.6→1.32, 3.7→1.33 최소) — 업그레이드 전 VKr 상향 + <b>ClusterClass 리베이스</b>(builtin-generic-v3.x.0) 필수, 최신 포인트 릴리스 권장</div></div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">19</div></div>
+    </section>
+
     <!-- 13 · Add-ons 생태계 -->
-    <section class="slide l-content" data-screen-label="19 Add-ons">
+    <section class="slide l-content" data-screen-label="20 Add-ons">
       <div class="head"><h2>VKS Add-ons 생태계</h2><div class="sub">3.7부터 통합 프레임워크로 전환 · 4개 지원 티어 · VKr 24개월 라이프사이클 귀속</div></div>
       <div class="body">
         <svg class="slidesvg" style="max-height:130px" viewBox="0 0 1120 130">
@@ -818,20 +839,20 @@
           </tbody>
         </table>
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">19</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">20</div></div>
     </section>
 
     <!-- 14 · Big summary -->
-    <section class="slide l-big" data-screen-label="20 요약">
+    <section class="slide l-big" data-screen-label="21 요약">
       <div class="statement" style="top:200px">
         <div class="eyebrow">Summary</div>
         VKS는 가상화 인프라를 <em>통째로 쿠버네티스화</em>하여 VM·컨테이너를 하나로,<br>VCF 9.1은 <em>엣지 없는 네트워킹·70% 빠른 배포·500 스케일</em>로 이를 완성한다.
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">20</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">21</div></div>
     </section>
 
     <!-- 15 · Thanks -->
-    <section class="slide l-thanks" data-screen-label="21 Thanks">
+    <section class="slide l-thanks" data-screen-label="22 Thanks">
       <svg class="swoosh" style="left:0;top:0" width="520" height="720" viewBox="0 0 520 720" fill="none">
         <defs><linearGradient id="gThx" x1="0" y1="720" x2="520" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/></linearGradient></defs>
         <path d="M0 0 H520 C 340 60 270 180 270 380 C 270 560 200 680 0 720 Z" fill="url(#gThx)" opacity="0.12"/>
@@ -842,7 +863,7 @@
         고객 소개 · 아키텍처 · VCF 9.1 · 버전별 3.5~3.7<br>
         근거 · Broadcom TechDocs (VKS 3.5–3.7 릴리스노트 · VKS Add-ons · 에어갭 가이드)
       </div>
-      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">21</div></div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">22</div></div>
     </section>
 
   </div>
