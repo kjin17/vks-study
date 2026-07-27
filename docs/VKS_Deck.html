@@ -940,4 +940,21 @@ VCF 9.1은 </span><span style="font-size:34.7px;font-weight:700;color:#1D6F79">�
 </div></div>
 <nav class="nav"><button id="prev">‹</button><div class="dots" id="dots"></div><button id="next">›</button></nav>
 <script>(function(){var s=[].slice.call(document.querySelectorAll('.slide')),db=document.getElementById('dots'),i=0,K='vks03-'+location.pathname,sv=parseInt(localStorage.getItem(K),10);if(!isNaN(sv)&&sv>=0&&sv<s.length)i=sv;s.forEach(function(_,k){var d=document.createElement('div');d.className='dot'+(k===i?' on':'');d.onclick=function(){go(k)};db.appendChild(d)});var dots=[].slice.call(db.children);function go(n){i=(n+s.length)%s.length;s.forEach(function(x,k){x.classList.toggle('active',k===i)});dots.forEach(function(d,k){d.classList.toggle('on',k===i)});try{localStorage.setItem(K,i)}catch(e){}}go(i);document.getElementById('prev').onclick=function(){go(i-1)};document.getElementById('next').onclick=function(){go(i+1)};document.addEventListener('keydown',function(e){if(e.key==='ArrowLeft')go(i-1);if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(i+1)}});function fit(){var d=document.getElementById('deck'),de=document.documentElement,w=de.clientWidth||innerWidth,h=de.clientHeight||innerHeight,sc=Math.min(w/1280,h/720)*0.96;d.style.transform='scale('+sc+')'}addEventListener('resize',fit);fit()})();</script>
+<script>/* auto-fit: shrink text that overflows its box to prevent overlap */
+(function(){
+function shrink(sh){
+  if(sh.dataset.f||!sh.querySelector('span'))return;
+  var g=0;
+  while(sh.scrollHeight>sh.clientHeight+2 && g<50){
+    var els=sh.querySelectorAll('span'),done=true;
+    for(var k=0;k<els.length;k++){var fs=parseFloat(getComputedStyle(els[k]).fontSize);if(fs>7.5){els[k].style.fontSize=(fs*0.93).toFixed(2)+'px';done=false;}}
+    if(done)break;g++;
+  }
+  sh.dataset.f='1';
+}
+function fitAll(){var a=document.querySelector('.slide.active');if(!a)return;a.querySelectorAll('.sh').forEach(shrink);}
+window.addEventListener('load',function(){setTimeout(fitAll,150)});
+document.addEventListener('keydown',function(){setTimeout(fitAll,50)});
+document.addEventListener('click',function(){setTimeout(fitAll,50)});
+})();</script>
 </body></html>
