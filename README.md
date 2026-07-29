@@ -6,6 +6,11 @@
 
 이 문서는 OD(Open Design)로 생성한 Broadcom 템플릿 소개 자료(`index.html`)의 텍스트 companion 이다. GitHub Pages로 배포된다.
 
+## 🔗 라이브 슬라이드 (GitHub Pages)
+
+- **랜딩 허브:** https://kjin17.github.io/vks-study/
+- **메인 슬라이드 덱:** https://kjin17.github.io/vks-study/VKS_Deck.html
+
 ---
 
 ## 1. VKS란?
