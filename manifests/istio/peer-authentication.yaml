@@ -1,0 +1,10 @@
+# 메시 전체 STRICT mTLS 강제 (보안 튜닝)
+# 주의: 사이드카가 주입되지 않은 워크로드와의 평문 통신이 차단됨
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: istio-system   # 루트 네임스페이스에 생성 시 메시 전체 적용
+spec:
+  mtls:
+    mode: STRICT
