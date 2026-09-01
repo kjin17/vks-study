@@ -1,9 +1,0 @@
-# Flux Source Controller - Istio Helm Chart 저장소 정의
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
-metadata:
-  name: istio
-  namespace: flux-system
-spec:
-  interval: 1h
-  url: https://istio-release.storage.googleapis.com/charts
