@@ -1,0 +1,13 @@
+# Sidecar 리소스: xDS 푸시 범위를 네임스페이스 단위로 제한
+# 기본값은 메시 전체 서비스 정보를 모든 사이드카에 푸시 → 대규모 클러스터에서
+# 사이드카 메모리 사용량 및 istiod 부하의 주요 원인. 핵심 튜닝 항목.
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: default
+  namespace: demo
+spec:
+  egress:
+  - hosts:
+    - "./*"              # 같은 네임스페이스의 서비스
+    - "istio-system/*"   # Control Plane

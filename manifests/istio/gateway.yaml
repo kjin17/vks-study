@@ -1,0 +1,27 @@
+# Kubernetes Gateway API - Gateway 리소스
+# gatewayClassName: istio 지정 시 Istio가 Deployment/Service를 자동 배포 (Automated Deployment)
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: demo-gateway
+  namespace: demo
+spec:
+  gatewayClassName: istio
+  listeners:
+  - name: http
+    port: 80
+    protocol: HTTP
+    allowedRoutes:
+      namespaces:
+        from: Same
+  # HTTPS 리스너 예시 (TLS Secret 준비 후 주석 해제)
+  # - name: https
+  #   port: 443
+  #   protocol: HTTPS
+  #   tls:
+  #     mode: Terminate
+  #     certificateRefs:
+  #     - name: demo-tls-cert
+  #   allowedRoutes:
+  #     namespaces:
+  #       from: Same
