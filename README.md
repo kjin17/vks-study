@@ -10,6 +10,21 @@
 
 - **랜딩 허브:** https://kjin17.github.io/vks-study/
 - **메인 슬라이드 덱:** https://kjin17.github.io/vks-study/VKS_Deck.html
+- **고급 네트워킹 덱:** https://kjin17.github.io/vks-study/VKS_Advanced_Networking_KR.html
+
+## 📚 심화 교육 자료
+
+| 문서 | 내용 |
+|---|---|
+| [`VKS_Cilium_CNI_KR.md`](VKS_Cilium_CNI_KR.md) | Cilium CNI — 애드온 프레임워크, 설치 4단계(`AddonInstall`·`AddonConfig`·`bootstrapAddons`·방화벽), kube-proxy 비활성화 API, 알려진 문제 |
+| [`VKS_Cilium_Hubble_KR.md`](VKS_Cilium_Hubble_KR.md) | Hubble 연동 — Server/Relay/UI 3층 구조, `AddonConfig` 설정값, 접근·검증, Prometheus 메트릭 |
+| [`VKS_Multus_MultiNIC_KR.md`](VKS_Multus_MultiNIC_KR.md) | 멀티 NIC — 노드 보조 NIC(`networks` 변수), Multus/Whereabouts, `NetworkAttachmentDefinition`, SR-IOV·vfio-pci |
+
+> 세 문서는 본문에 **근거 등급**을 표기한다. 🅑 = Broadcom 공식 문서 명시, 🅞 = 업스트림 일반 지식,
+> ❓ = 출처 간 서술이 엇갈려 **미결**로 남긴 항목. 실환경 적용 전에 등급을 먼저 보라.
+
+덱은 `exports/build_netdeck.py` 로 생성하고 `exports/check_deck_overflow.py` 로 레이아웃 넘침을 검사한다.
+`.slide` 가 `overflow:hidden` 이라 **넘친 내용은 조용히 잘리므로**, 육안 대신 이 자를 쓸 것.
 
 ---
 

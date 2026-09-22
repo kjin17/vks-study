@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VKS 고급 네트워킹 — Cilium · Hubble · Multus</title>
+<style>
+  :root {
+    --vmw-navy: #1B1E35;
+    --vmw-white: #FFFFFF;
+    --vmw-gray: #F2F2F2;
+    --vmw-teal: #007A86;
+    --vmw-blue: #005B84;
+    --vmw-sky: #0193C2;
+    --vmw-green: #61A00A;
+    --vmw-plum: #6C4B8F;
+    --vmw-gold: #EDB516;
+    --vmw-link: #E18629;
+    --grad-leaf: linear-gradient(135deg, #61A00A 0%, #007A86 100%);
+    --grad-aqua: linear-gradient(135deg, #0193C2 0%, #005B84 100%);
+    --grad-plum: linear-gradient(135deg, #6C4B8F 0%, #005B84 100%);
+    --font-sans: Arial, "Helvetica Neue", Helvetica, Roboto, sans-serif;
+    --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: #26283f; font-family: var(--font-sans); }
+
+  .stage { position: fixed; inset: 0; overflow: hidden; }
+  .deck { position: absolute; left: 50%; top: 50%; margin-left: -640px; margin-top: -360px;
+    width: 1280px; height: 720px; transform-origin: center; }
+
+  .slide {
+    position: absolute; inset: 0; width: 1280px; height: 720px;
+    background: var(--vmw-white); color: var(--vmw-navy);
+    display: none; overflow: hidden;
+  }
+  .slide.active { display: block; }
+
+  /* ---------- shared chrome ---------- */
+  .footer {
+    position: absolute; left: 64px; right: 64px; bottom: 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px; color: #8a8d9c; letter-spacing: .01em;
+  }
+  .brand-mark { font-size: 13px; font-weight: 700; color: var(--vmw-navy); letter-spacing: -.01em; }
+  .brand-mark span { font-weight: 400; color: #6a6e80; }
+  .page-no { font-size: 11px; color: #8a8d9c; }
+
+  .eyebrow {
+    display: inline-block; font-size: 14px; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--vmw-teal); margin-bottom: 18px;
+  }
+  .swoosh { position: absolute; pointer-events: none; }
+
+  /* ---------- L1: Title ---------- */
+  .l-title .title-block { position: absolute; left: 560px; right: 72px; top: 176px; }
+  .l-title h1 { font-size: 44px; line-height: 1.16; font-weight: 700; letter-spacing: -.015em; color: var(--vmw-navy); }
+  .l-title .rule { width: 100%; height: 2px; background: var(--vmw-sky); margin: 24px 0; }
+  .l-title .subtitle { font-size: 19px; color: #4b4f63; line-height: 1.45; }
+  .l-title .meta { position: absolute; left: 560px; top: 520px; font-size: 13px; color: #6a6e80; line-height: 1.7; }
+  .l-title .meta b { color: var(--vmw-navy); }
+
+  /* ---------- L2: Agenda ---------- */
+  .l-agenda .head { position: absolute; left: 64px; top: 60px; right: 64px; }
+  .l-agenda h2 { font-size: 36px; font-weight: 700; letter-spacing: -.01em; }
+  .l-agenda .head .bar { width: 64px; height: 4px; background: var(--grad-leaf); margin-top: 16px; border-radius: 2px; }
+  .l-agenda ol { position: absolute; left: 64px; right: 64px; top: 176px; bottom: 78px;
+    display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; row-gap: 4px; list-style: none;
+    grid-auto-rows: min-content; }
+  .l-agenda li { display: flex; gap: 18px; padding: 14px 0; border-bottom: 1px solid #e3e5ec; align-items: baseline; }
+  .l-agenda .num { font-size: 20px; font-weight: 700; color: var(--vmw-teal); min-width: 34px; }
+  .l-agenda .item-title { font-size: 18px; font-weight: 700; }
+  .l-agenda .item-sub { font-size: 12.5px; color: #6a6e80; margin-top: 3px; }
+
+  /* ---------- L3: Section ---------- */
+  .l-section .sec-num { position: absolute; left: 64px; top: 190px; font-size: 20px; font-weight: 700; color: var(--vmw-teal); letter-spacing: .2em; }
+  .l-section h2 { position: absolute; left: 64px; top: 240px; width: 640px; font-size: 50px; line-height: 1.12; font-weight: 700; letter-spacing: -.015em; }
+  .l-section .sec-sub { position: absolute; left: 64px; top: 460px; width: 580px; font-size: 18px; color: #4b4f63; line-height: 1.5; }
+
+  /* ---------- L4: Content ---------- */
+  .l-content .head, .l-two .head, .l-data .head, .l-flow .head, .l-steps .head {
+    position: absolute; left: 64px; top: 52px; right: 64px; padding-bottom: 18px; border-bottom: 2px solid var(--vmw-teal);
+  }
+  .l-content h2, .l-two h2, .l-data h2, .l-flow h2, .l-steps h2 { font-size: 29px; font-weight: 700; letter-spacing: -.01em; }
+  .l-content .head .sub, .l-two .head .sub, .l-data .head .sub, .l-flow .head .sub, .l-steps .head .sub { font-size: 14px; color: #6a6e80; margin-top: 7px; }
+  .l-content .body { position: absolute; left: 64px; right: 64px; top: 164px; bottom: 76px; }
+  .l-content ul { list-style: none; }
+  .l-content ul li { position: relative; padding: 9px 0 9px 28px; font-size: 18px; line-height: 1.45; color: #2c3047; }
+  .l-content ul li::before { content: ""; position: absolute; left: 0; top: 18px; width: 11px; height: 11px; border-radius: 3px; background: var(--grad-leaf); }
+  .l-content ul li b { color: var(--vmw-navy); }
+  .l-content ul ul li { font-size: 15px; color: #4b4f63; padding: 5px 0 5px 24px; }
+  .l-content ul ul li::before { width: 7px; height: 7px; top: 13px; border-radius: 50%; background: var(--vmw-sky); }
+
+  /* ---------- L5: Two-column ---------- */
+  .l-two .cols { position: absolute; left: 64px; right: 64px; top: 164px; bottom: 76px; display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+  .card { background: var(--vmw-gray); border-radius: 14px; padding: 24px 28px; }
+  .card .card-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--vmw-white); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px; }
+  .card.leaf .card-tag { background: var(--grad-leaf); }
+  .card.aqua .card-tag { background: var(--grad-aqua); }
+  .card.plum .card-tag { background: var(--grad-plum); }
+  .card h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+  .card p, .card li { font-size: 14.5px; line-height: 1.5; color: #4b4f63; }
+  .card ul { list-style: none; margin-top: 4px; }
+  .card ul li { padding: 4px 0 4px 18px; position: relative; }
+  .card ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 7px; height: 7px; border-radius: 50%; background: var(--vmw-teal); }
+  .card ul li b { color: var(--vmw-navy); }
+
+  /* ---------- L6: Data ---------- */
+  .l-data .metrics { position: absolute; left: 64px; right: 64px; top: 176px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .metric { border: 1px solid #e3e5ec; border-radius: 14px; padding: 22px 26px; }
+  .metric .big { font-size: 42px; font-weight: 700; letter-spacing: -.02em; }
+  .metric.leaf .big { color: var(--vmw-green); }
+  .metric.aqua .big { color: var(--vmw-teal); }
+  .metric.plum .big { color: var(--vmw-plum); }
+  .metric .label { font-size: 14px; font-weight: 700; margin-top: 6px; }
+  .metric .desc { font-size: 12.5px; color: #6a6e80; margin-top: 5px; line-height: 1.45; }
+  .l-data table { position: absolute; left: 64px; right: 64px; top: 388px; width: calc(100% - 128px); border-collapse: collapse; font-size: 14px; }
+  .l-data th { text-align: left; padding: 11px 16px; background: var(--vmw-navy); color: var(--vmw-white); font-weight: 700; }
+  .l-data th:first-child { border-radius: 8px 0 0 8px; }
+  .l-data th:last-child { border-radius: 0 8px 8px 0; }
+  .l-data td { padding: 10px 16px; border-bottom: 1px solid #e3e5ec; color: #2c3047; }
+  .l-data td b { color: var(--vmw-teal); }
+  .mono { font-family: var(--font-mono); font-size: 13px; }
+
+  /* ---------- L8: Big ---------- */
+  .l-big { background: var(--vmw-navy); color: var(--vmw-white); }
+  .l-big .statement { position: absolute; left: 90px; right: 90px; top: 232px; font-size: 50px; line-height: 1.2; font-weight: 700; letter-spacing: -.015em; }
+  .l-big .statement em { font-style: normal; background: var(--grad-leaf); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .l-big .eyebrow { color: #7dd0d8; }
+  .l-big .footer { color: #6d7188; }
+  .l-big .brand-mark { color: var(--vmw-white); }
+  .l-big .brand-mark span { color: #9ba0b8; }
+
+  /* ---------- L9: Thanks ---------- */
+  .l-thanks h2 { position: absolute; left: 90px; top: 250px; font-size: 66px; font-weight: 700; letter-spacing: -.02em; }
+  .l-thanks .contact { position: absolute; left: 90px; top: 392px; font-size: 16px; line-height: 1.8; color: #4b4f63; width: 560px; }
+  .l-thanks .contact b { color: var(--vmw-navy); }
+  .l-thanks .contact a { color: var(--vmw-link); text-decoration: none; word-break: break-all; }
+
+  /* ---------- code blocks ---------- */
+  .code { background: var(--vmw-navy); border-radius: 10px; padding: 14px 18px;
+    font-family: var(--font-mono); font-size: 13px; line-height: 1.65; color: #dfe2ef; }
+  .code .c { color: #7a80a0; }         /* comment */
+  .code .cmd { color: #8ad35a; }        /* command keyword */
+  .code .arg { color: #5ec7e0; }        /* flag / arg */
+  .code .str { color: #edb516; }        /* value / string */
+  .code .pr { color: #61A00A; font-weight: 700; }  /* prompt $ */
+
+  /* ---------- callout ---------- */
+  .callout { display: flex; gap: 12px; align-items: flex-start; border-radius: 12px;
+    padding: 14px 18px; font-size: 14px; line-height: 1.5; }
+  .callout .ico { flex: none; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #fff; }
+  .callout.warn { background: #fdf6e3; border: 1px solid #f0d98a; color: #6b5713; }
+  .callout.warn .ico { background: var(--vmw-gold); color: var(--vmw-navy); }
+  .callout.warn b { color: #7a5a00; }
+  .callout.tip { background: #eaf5f6; border: 1px solid #b9dde0; color: #234b4f; }
+  .callout.tip .ico { background: var(--vmw-teal); }
+  .callout.tip b { color: var(--vmw-teal); }
+
+  /* ---------- FLOW diagram ---------- */
+  .l-flow .flow { position: absolute; left: 64px; right: 64px; top: 210px;
+    display: flex; align-items: stretch; gap: 0; }
+  .fnode { flex: 1 1 0; border-radius: 14px; background: var(--vmw-gray); border: 1px solid #e3e5ec;
+    padding: 18px 14px 16px; text-align: center; position: relative; min-height: 168px; display: flex; flex-direction: column; }
+  .fnode .bar { position: absolute; left: 0; right: 0; top: 0; height: 6px; border-radius: 14px 14px 0 0; }
+  .fnode.n1 .bar { background: #9aa0b4; }
+  .fnode.n2 .bar { background: var(--grad-aqua); }
+  .fnode.n3 .bar { background: var(--grad-leaf); }
+  .fnode.n4 .bar { background: var(--grad-aqua); }
+  .fnode.n5 .bar { background: var(--grad-plum); }
+  .fnode .ficon { font-size: 26px; margin: 8px 0 10px; line-height: 1; }
+  .fnode .ftitle { font-size: 16px; font-weight: 700; color: var(--vmw-navy); }
+  .fnode .fkr { font-size: 12px; color: #6a6e80; margin-top: 2px; }
+  .fnode .fdesc { font-size: 12px; color: #4b4f63; margin-top: 10px; line-height: 1.45; }
+  .farrow { flex: 0 0 44px; display: flex; align-items: center; justify-content: center; color: var(--vmw-teal); font-size: 26px; font-weight: 700; }
+  .fgap { flex: 0 0 62px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .fgap::before { content: ""; position: absolute; top: -14px; bottom: -14px; left: 50%; border-left: 2px dashed var(--vmw-gold); }
+  .fgap .glabel { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+    font-size: 11px; font-weight: 700; color: #9a7a00; background: #fdf6e3; border: 1px solid #f0d98a; padding: 4px 10px; border-radius: 999px; }
+  .fgap .garrow { color: var(--vmw-gold); font-size: 24px; font-weight: 700; z-index: 1; background: #fff; padding: 0 2px; }
+  .l-flow .flowcap { position: absolute; left: 64px; right: 64px; top: 470px;
+    font-size: 15px; color: #4b4f63; line-height: 1.6; }
+  .l-flow .flowcap b { color: var(--vmw-teal); }
+  .l-flow .flowcap .oneway { font-weight: 700; color: var(--vmw-navy); }
+
+  /* ---------- STEPS overview ---------- */
+  .l-steps .grid { position: absolute; left: 64px; right: 64px; top: 172px; bottom: 76px;
+    display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 1fr 1fr; gap: 18px; }
+  .step { border: 1px solid #e3e5ec; border-radius: 13px; padding: 16px 18px; position: relative; overflow: hidden; }
+  .step .sn { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+  .step .st { font-size: 15.5px; font-weight: 700; color: var(--vmw-navy); margin-top: 8px; }
+  .step .sd { font-size: 12px; color: #6a6e80; margin-top: 6px; line-height: 1.45; }
+  .step .host { position: absolute; top: 16px; right: 16px; font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+  .step.p-dl .sn { color: var(--vmw-sky); }   .step.p-dl .host { background: #e3f2f6; color: var(--vmw-blue); }
+  .step.p-sup .sn { color: var(--vmw-teal); } .step.p-sup .host { background: #e0f0e0; color: var(--vmw-green); }
+  .step.p-adm .sn { color: var(--vmw-plum); } .step.p-adm .host { background: #efe8f5; color: var(--vmw-plum); }
+  .step.p-dep .sn { color: var(--vmw-gold); } .step.p-dep .host { background: #fdf6e3; color: #9a7a00; }
+
+  /* step detail slides reuse l-content .body split */
+  .split { position: absolute; left: 64px; right: 64px; top: 164px; bottom: 76px;
+    display: grid; grid-template-columns: 0.92fr 1.08fr; gap: 34px; align-items: start; }
+  .split .lead { list-style: none; }
+  .split .lead li { position: relative; padding: 8px 0 8px 26px; font-size: 16px; line-height: 1.45; color: #2c3047; }
+  .split .lead li::before { content: ""; position: absolute; left: 0; top: 15px; width: 10px; height: 10px; border-radius: 3px; background: var(--grad-leaf); }
+  .split .lead li b { color: var(--vmw-navy); }
+  .split .codeblk { display: flex; flex-direction: column; gap: 12px; }
+  .codelabel { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--vmw-teal); margin-bottom: -4px; }
+
+  /* ---------- navigation ---------- */
+  .nav {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 14px; z-index: 50;
+    background: rgba(27,30,53,.82); border-radius: 999px; padding: 8px 16px; backdrop-filter: blur(6px);
+  }
+  .nav button { border: 0; background: transparent; color: #fff; font-size: 16px; cursor: pointer;
+    width: 30px; height: 30px; border-radius: 50%; font-family: var(--font-sans); }
+  .nav button:hover { background: rgba(255,255,255,.15); }
+  .dots { display: flex; gap: 6px; flex-wrap: wrap; max-width: 520px; justify-content: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.3); cursor: pointer; transition: all .18s; }
+  .dot.on { background: #fff; width: 20px; border-radius: 4px; }
+</style>
+<style>
+  .code { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .split .codeblk { gap: 10px; }   /* 코드 2블록 슬라이드가 푸터를 4px 덮어서 */
+  .l-thanks .contact { top: 296px; font-size: 14.5px; line-height: 1.72; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="deck" id="deck">
+
+    <!-- 1 · 01 Title -->
+    <section class="slide l-title active" data-screen-label="01 Title">
+      <svg class="swoosh" style="left:0;top:0" width="560" height="720" viewBox="0 0 560 720" fill="none">
+        <defs>
+          <linearGradient id="gTitleLeaf" x1="0" y1="720" x2="560" y2="0" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/>
+          </linearGradient>
+        </defs>
+        <path d="M0 0 H560 C 380 60 300 180 300 380 C 300 560 220 680 0 720 Z" fill="url(#gTitleLeaf)"/>
+        <path d="M560 14 C 388 76 316 192 316 380 C 316 556 240 672 40 720" stroke="#0193C2" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="title-block">
+        <div class="eyebrow">VCF 9.1 · VKS 3.6 / 3.7</div>
+        <h1>VKS 고급 네트워킹<br>Cilium · Hubble · Multus</h1>
+        <div class="rule"></div>
+        <div class="subtitle">eBPF 데이터플레인으로 CNI를 바꾸고, 플로우를 관측하고, 파드에 전용 NIC를 붙이는 세 갈래를 한 번에 정리합니다.</div>
+      </div>
+      <div class="meta">
+        <b>대상</b> · VKS 플랫폼·운영 엔지니어, Telco/CNF 담당<br>
+        기준 릴리스 : VKS 3.6 / 3.7 · VKr 1.35~1.36
+      </div>
+      <div class="footer">
+        <div>Broadcom Proprietary and Confidential. Copyright © 2025 Broadcom. All Rights Reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.</div>
+        <div class="brand-mark">VMware <span>by Broadcom</span></div>
+      </div>
+    </section>
+
+    <!-- 2 · 02 Agenda -->
+    <section class="slide l-agenda" data-screen-label="02 Agenda">
+      <div class="head"><h2>목차</h2><div class="bar"></div></div>
+      <ol>
+        <li><span class="num">01</span><span><span class="item-title">전체 지도</span><div class="item-sub">CNI 선택지와 「두 개의 층」</div></span></li>
+        <li><span class="num">02</span><span><span class="item-title">Cilium CNI</span><div class="item-sub">애드온 프레임워크 · 설치 4단계</div></span></li>
+        <li><span class="num">03</span><span><span class="item-title">kube-proxy 없이 돌리기</span><div class="item-sub">immutable 결정 · 고급 기능의 전제</div></span></li>
+        <li><span class="num">04</span><span><span class="item-title">Hubble 연동</span><div class="item-sub">Server / Relay / UI · 플로우 관측</div></span></li>
+        <li><span class="num">05</span><span><span class="item-title">노드 보조 NIC</span><div class="item-sub">networks 변수 · NSX VPC / VDS</div></span></li>
+        <li><span class="num">06</span><span><span class="item-title">Multus 멀티 NIC 파드</span><div class="item-sub">NAD · Whereabouts · SR-IOV</div></span></li>
+      </ol>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">2</div></div>
+    </section>
+
+    <!-- 3 · 03 Section-전체지도 -->
+    <section class="slide l-section" data-screen-label="03 Section-전체지도">
+      <svg class="swoosh" style="right:0;top:0;left:auto" width="480" height="720" viewBox="0 0 480 720" fill="none">
+        <defs><linearGradient id="gLeaf2" x1="480" y1="0" x2="0" y2="720" gradientUnits="userSpaceOnUse"><stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/></linearGradient></defs>
+        <path d="M480 0 V720 H120 C 300 640 360 520 360 360 C 360 200 300 80 200 0 Z" fill="url(#gLeaf2)"/>
+        <path d="M186 0 C 288 84 346 202 346 360 C 346 522 286 644 100 720" stroke="#0193C2" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="sec-num">SECTION 01</div>
+      <h2>전체 지도</h2>
+      <div class="sec-sub">세 주제를 각각 배우기 전에, VKS 안에서 서로 어떻게 맞물리는지부터 봅니다.</div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">3</div></div>
+    </section>
+
+    <!-- 4 · 04 CNI 선택지 -->
+    <section class="slide l-data" data-screen-label="04 CNI 선택지">
+      <div class="head"><h2>VKS의 CNI 선택지</h2><div class="sub">Antrea가 전략적 기본이고, Cilium은 VKS 3.6에 합류한 <b>대안</b>입니다</div></div>
+      <table style="top:180px">
+        <tr><th>CNI</th><th>VKS에서의 위치</th><th>지원 티어</th><th>도입</th></tr>
+        <tr><td><b>Antrea</b></td><td>전략적 기본 CNI · NSX 어댑터 · 하이브리드 캡슐화 · 파드 멀티 NIC</td><td>VKr 내장</td><td>기존</td></tr>
+        <tr><td><b>Calico</b></td><td>내장 대안 CNI · VPC 모드 + Multus 조합의 기준</td><td>VKr 내장</td><td>기존</td></tr>
+        <tr><td><b>Cilium</b></td><td>eBPF 데이터플레인 · Hubble 관측성 · L7 정책 · kube-proxy 대체</td><td><b>Ecosystem</b></td><td>VKS 3.6 / VKr 1.35</td></tr>
+      </table>
+      <div class="callout warn" style="position:absolute;left:64px;right:64px;top:400px">
+        <div class="ico">!</div>
+        <div><b>티어를 먼저 보세요.</b> Ecosystem 티어는 패키징·서명·라이프사이클까지만 지원하고 <b>런타임 문제는 Broadcom 지원 범위 밖</b>입니다. 내장 CNI나 Product 티어 애드온과 지원 성격이 다르므로, 프로덕션 도입 결정에 이 차이를 반드시 반영하세요.</div>
+      </div>
+      <div class="callout tip" style="position:absolute;left:64px;right:64px;top:520px">
+        <div class="ico">i</div>
+        <div>CNI 관리 방식도 바뀌었습니다. <b>ClusterBootstrap 의 cni 필드 · AntreaConfig · CalicoConfig 는 폐기</b>되고 VKr 1.35+ 에서 <b>bootstrapAddons 변수 + AddonConfig</b> 로 전환됩니다. 예전 문서를 따라가다 여기서 막히는 경우가 많습니다.</div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">4</div></div>
+    </section>
+
+    <!-- 5 · 05 두 개의 층 -->
+    <section class="slide l-two" data-screen-label="05 두 개의 층">
+      <div class="head"><h2>멀티 NIC은 「두 개의 층」이다</h2><div class="sub">이걸 안 가르면 설계도 트러블슈팅도 어긋납니다</div></div>
+      <div class="cols">
+        <div class="card aqua">
+          <div class="card-tag">Layer 2 · 인프라</div>
+          <h3>노드 보조 NIC (eth1~eth9)</h3>
+          <ul>
+            <li>단위 = <b>노드 VM</b>. 그 노드의 모든 파드가 공유</li>
+            <li><b>CAPV / vm-operator</b> 가 담당 — CNI 와 무관</li>
+            <li><code>networks</code> 변수로 선언 · VKS 3.6</li>
+            <li>쓰는 곳 : NFS 스토리지·DB 복제 등 <b>노드 전체 트래픽 분리</b></li>
+          </ul>
+        </div>
+        <div class="card leaf">
+          <div class="card-tag">Layer 3 · 파드</div>
+          <h3>파드 멀티 NIC (net1, net2 …)</h3>
+          <ul>
+            <li>단위 = <b>개별 파드</b>. 파드마다 전용 인터페이스·전용 IP</li>
+            <li><b>Multus</b>(VKS 3.7) 또는 <b>Antrea SecondaryNetwork</b>(3.6)</li>
+            <li><code>NetworkAttachmentDefinition</code> + 파드 어노테이션</li>
+            <li>쓰는 곳 : CNF·멀티캐스트 등 <b>특정 워크로드 전용 경로</b></li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout warn" style="position:absolute;left:64px;right:64px;bottom:76px">
+        <div class="ico">!</div>
+        <div><b>eth1 을 붙여도 트래픽은 안 나뉩니다.</b> 파드는 계속 eth0 을 쓰고, eth1 에는 <b>기본 경로가 없습니다</b>. 보안 가치는 <b>위상</b>에 있습니다 — API 서버는 eth0 서브넷에서만 듣기 때문에, eth1 에만 연결된 것은 컨트롤 플레인에 물리적으로 닿지 못합니다.</div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">5</div></div>
+    </section>
+
+    <!-- 6 · 06 Section-Cilium -->
+    <section class="slide l-section" data-screen-label="06 Section-Cilium">
+      <svg class="swoosh" style="right:0;top:0;left:auto" width="480" height="720" viewBox="0 0 480 720" fill="none">
+        <defs><linearGradient id="gAqua2" x1="480" y1="0" x2="0" y2="720" gradientUnits="userSpaceOnUse"><stop stop-color="#0193C2"/><stop offset="1" stop-color="#005B84"/></linearGradient></defs>
+        <path d="M480 0 V720 H120 C 300 640 360 520 360 360 C 360 200 300 80 200 0 Z" fill="url(#gAqua2)"/>
+        <path d="M186 0 C 288 84 346 202 346 360 C 346 522 286 644 100 720" stroke="#0193C2" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="sec-num">SECTION 02</div>
+      <h2>Cilium CNI</h2>
+      <div class="sec-sub">애드온 프레임워크의 리소스 지도를 먼저 잡고, 설치 4단계를 따라갑니다.</div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">6</div></div>
+    </section>
+
+    <!-- 7 · 07 애드온 리소스 지도 -->
+    <section class="slide l-data" data-screen-label="07 애드온 리소스 지도">
+      <div class="head"><h2>애드온 프레임워크 — 리소스 지도</h2><div class="sub">VKS 3.5부터 애드온이 선언적 API로 전환. Cilium 설치는 이 리소스를 순서대로 쌓는 일입니다</div></div>
+      <table style="top:176px">
+        <tr><th>리소스</th><th>위치</th><th>역할</th></tr>
+        <tr><td><span class="mono">AddonRepository(Install)</span></td><td>vmware-system-vks-public</td><td>패키지 저장소 정의 · 클러스터 바인딩</td></tr>
+        <tr><td><span class="mono">AddonRelease</span></td><td>vmware-system-vks-public</td><td>버전의 불변 메타데이터 — 호환 제약·의존성</td></tr>
+        <tr><td><span class="mono">AddonConfigDefinition</span></td><td>vmware-system-vks-public</td><td><b>설정 스키마</b> — AddonConfig 를 검증하는 정본</td></tr>
+        <tr><td><b><span class="mono">AddonInstall</span></b></td><td>클러스터 ns 또는 public</td><td><b>원하는 애드온 상태 선언</b> — 우리가 만드는 것</td></tr>
+        <tr><td><span class="mono">ClusterAddon</span></td><td>클러스터 ns</td><td>클러스터별 인스턴스 + 상태 보고</td></tr>
+        <tr><td><b><span class="mono">AddonConfig</span></b></td><td>클러스터 ns</td><td><b>스키마 검증되는 설정값</b> — Hubble 을 켜는 자리</td></tr>
+      </table>
+      <div class="callout warn" style="position:absolute;left:64px;right:64px;top:520px">
+        <div class="ico">!</div>
+        <div><b>VKS 3.7 저장소 모델 변경</b> — 단일 저장소 갱신이 아니라 <b>버전별 추가(additive)</b> 방식입니다. 3.5/3.6 에서 올라온 환경의 <span class="mono">default-addon-repo-install</span> 은 deprecated 이며, 불필요한 리소스는 <b>관리자가 직접 삭제</b>해야 합니다.</div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">7</div></div>
+    </section>
+
+    <!-- 8 · 08 버전 타임라인 -->
+    <section class="slide l-data" data-screen-label="08 버전 타임라인">
+      <div class="head"><h2>전제 조건과 버전</h2><div class="sub">Cilium 은 클러스터 생성 <b>전에</b> 준비가 끝나 있어야 합니다 — 사후에 끼워 넣는 경로가 아닙니다</div></div>
+      <div class="metrics">
+        <div class="metric aqua"><div class="big">3.6+</div><div class="label">VKS 버전</div><div class="desc">VKr 1.35 이상 필요</div></div>
+        <div class="metric leaf"><div class="big">1.19.4</div><div class="label">Cilium (v3.7.0+20260618)</div><div class="desc">최초 합류는 1.19.1 (v3.6.0+20260320)</div></div>
+        <div class="metric plum"><div class="big">4</div><div class="label">열어야 할 포트</div><div class="desc">2379-2380 / 8472 / 4240 / 4244</div></div>
+      </div>
+      <table>
+        <tr><th>애드온 저장소</th><th>Cilium</th><th>주요 내용</th></tr>
+        <tr><td>v3.6.0+20260320</td><td><b>1.19.1</b></td><td>대안 CNI 공식 합류 · eBPF 데이터플레인 · Hubble UI/Relay · NetworkPolicy(L3/L4) + CiliumNetworkPolicy(L7)</td></tr>
+        <tr><td>v3.7.0+20260618</td><td><b>1.19.4</b></td><td>L7 프록시(Envoy) · Ingress · Egress Gateway · Gateway API · eBPF 마스커레이딩 · XDP 가속 · Prometheus/Hubble 메트릭</td></tr>
+      </table>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">8</div></div>
+    </section>
+
+    <!-- 9 · 09 설치 4단계 -->
+    <section class="slide l-steps" data-screen-label="09 설치 4단계">
+      <div class="head"><h2>Cilium 설치 4단계</h2><div class="sub">모두 <b>클러스터 생성 전</b>에 끝나 있어야 합니다</div></div>
+      <div class="grid" style="grid-template-columns:repeat(4,1fr);grid-template-rows:1fr">
+        <div class="step p-sup"><div class="sn">01</div><div class="host">Supervisor</div><div class="st">AddonInstall 생성</div><div class="sd">CEL 제약으로 대상 클러스터를 한정. <b>ownerReference 필수</b></div></div>
+        <div class="step p-adm"><div class="sn">02</div><div class="host">선택</div><div class="st">AddonConfig 작성</div><div class="sd">MTU · Hubble 기본값 덮어쓰기. 사후 수정 가능</div></div>
+        <div class="step p-dl"><div class="sn">03</div><div class="host">Cluster YAML</div><div class="st">bootstrapAddons</div><div class="sd">CNI 를 cilium 으로 선택. <b>부트스트랩 단계에만</b> 적용</div></div>
+        <div class="step p-dep"><div class="sn">04</div><div class="host">Cluster YAML</div><div class="st">방화벽 규칙</div><div class="sd">CP 와 워커에 <b>각각</b> 넣어야 함</div></div>
+      </div>
+      <div class="callout warn" style="position:absolute;left:64px;right:64px;top:400px">
+        <div class="ico">!</div>
+        <div><b>Step 1 의 지뢰 — Cluster 를 지워도 AddonInstall 은 남습니다.</b> 라이프사이클을 따로 관리하거나 클러스터에 ownerReference 를 걸어야 합니다. 안 걸면 클러스터를 지우고 다시 만들 때 <b>옛 AddonInstall 이 살아남아</b> 새 클러스터에 의도치 않게 매칭될 수 있습니다. AddonConfig 는 <span class="mono">clusteraddon.addons.kubernetes.vmware.com/owned-for-deletion: "true"</span> 어노테이션으로 처리합니다.</div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">9</div></div>
+    </section>
+
+    <!-- 10 · 10 Step1 AddonInstall -->
+    <section class="slide l-content" data-screen-label="10 Step1 AddonInstall">
+      <div class="head"><h2>Step 1 · AddonInstall</h2><div class="sub">Supervisor 의 클러스터 네임스페이스에 생성</div></div>
+      <div class="split">
+        <ul class="lead">
+          <li><b>CEL 제약</b>으로 「CNI 참조가 cilium 이고 K8s 1.35 이상」일 때만 매칭</li>
+          <li>조건을 벗어난 클러스터에 실수로 붙는 것을 막아 줍니다</li>
+          <li><b>ownerReference 를 걸어</b> 클러스터와 함께 지워지게 하세요</li>
+        </ul>
+        <div class="codeblk">
+          <div class="codelabel">addoninstall-cilium.yaml</div>
+          <div class="code"><span class="cmd">apiVersion:</span> <span class="str">addons.kubernetes.vmware.com/v1alpha1</span>
+<span class="cmd">kind:</span> <span class="str">AddonInstall</span>
+<span class="cmd">metadata:</span>
+  <span class="arg">name:</span> &lt;cluster-name&gt;-cilium
+  <span class="arg">namespace:</span> &lt;cluster-namespace&gt;
+<span class="cmd">spec:</span>
+  <span class="arg">addonRef:</span>
+    <span class="arg">name:</span> <span class="str">cilium</span>
+  <span class="arg">clusters:</span>
+    - <span class="arg">constraints:</span>
+        <span class="arg">expression:</span> <span class="str">"cluster.cniRefName() == 'cilium' &amp;&amp;
+          version_in_range(cluster.spec.topology.version, '&gt;=1.35.0')"</span>
+      <span class="arg">selector:</span>
+        <span class="arg">matchLabels:</span>
+          <span class="arg">cluster.x-k8s.io/cluster-name:</span> &lt;cluster-name&gt;
+      <span class="arg">stopMatchingBehavior:</span> <span class="str">Retain</span></div>
+          <div class="code"><span class="pr">$</span> <span class="cmd">kubectl</span> apply <span class="arg">-f</span> addoninstall-cilium.yaml
+<span class="pr">$</span> <span class="cmd">kubectl</span> get addoninstall &lt;cluster-name&gt;-cilium <span class="arg">-n</span> &lt;ns&gt;</div>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">10</div></div>
+    </section>
+
+    <!-- 11 · 11 Step2-3 AddonConfig-bootstrapAddons -->
+    <section class="slide l-content" data-screen-label="11 Step2-3 AddonConfig-bootstrapAddons">
+      <div class="head"><h2>Step 2·3 · AddonConfig 와 bootstrapAddons</h2><div class="sub">설정값은 <b>AddonConfigDefinition 스키마로 검증</b>됩니다 — 임의의 Helm 값이 통과한다고 가정하지 마세요</div></div>
+      <div class="split">
+        <div class="codeblk">
+          <div class="codelabel">Step 2 · AddonConfig (선택)</div>
+          <div class="code"><span class="cmd">apiVersion:</span> <span class="str">addons.kubernetes.vmware.com/v1alpha1</span>
+<span class="cmd">kind:</span> <span class="str">AddonConfig</span>
+<span class="cmd">metadata:</span>
+  <span class="arg">name:</span> &lt;cluster-name&gt;-cilium
+  <span class="arg">namespace:</span> &lt;cluster-namespace&gt;
+  <span class="arg">annotations:</span>
+    <span class="c"># 클러스터와 함께 삭제되게 (권장)</span>
+    <span class="arg">clusteraddon.addons.kubernetes.vmware.com/owned-for-deletion:</span> <span class="str">"true"</span>
+<span class="cmd">spec:</span>
+  <span class="arg">values:</span>
+    <span class="arg">hubble:</span>
+      <span class="arg">enabled:</span> <span class="str">true</span>
+      <span class="arg">relay:</span> { <span class="arg">enabled:</span> <span class="str">true</span> }
+      <span class="arg">ui:</span> { <span class="arg">enabled:</span> <span class="str">true</span> }</div>
+        </div>
+        <div class="codeblk">
+          <div class="codelabel">Step 3 · spec.topology.variables</div>
+          <div class="code"><span class="cmd">- name:</span> <span class="str">bootstrapAddons</span>
+  <span class="arg">value:</span>
+    <span class="arg">cniRef:</span>
+      <span class="arg">name:</span> <span class="str">cilium</span>
+      <span class="arg">namespace:</span> <span class="str">vmware-system-vks-public</span></div>
+          <ul class="lead" style="margin-top:6px">
+            <li>변수 도입 <b>3.6.0</b> · K8s <b>1.35 이상</b>에서만</li>
+            <li>적용 범위 : <span class="mono">cluster</span>, <span class="mono">controlPlane</span></li>
+            <li><b>초기 부트스트랩 단계</b>에 쓰이므로 클러스터 생성 전 YAML 에 있어야 합니다</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">11</div></div>
+    </section>
+
+    <!-- 12 · 12 Step4 방화벽 -->
+    <section class="slide l-data" data-screen-label="12 Step4 방화벽">
+      <div class="head"><h2>Step 4 · 방화벽 4개 포트</h2><div class="sub"><span class="mono">node.firewall.inboundRules</span> — CP 는 topology.variables, 워커는 machineDeployment override</div></div>
+      <table style="top:176px">
+        <tr><th>포트</th><th>프로토콜</th><th>용도</th><th>컨트롤 플레인</th><th>워커</th></tr>
+        <tr><td><b>2379–2380</b></td><td>TCP</td><td>etcd 클라이언트·피어 통신</td><td>✅</td><td>—</td></tr>
+        <tr><td><b>8472</b></td><td>UDP</td><td>VXLAN 터널 캡슐화</td><td>✅</td><td>✅</td></tr>
+        <tr><td><b>4240</b></td><td>TCP</td><td>Cilium 에이전트 헬스체크</td><td>✅</td><td>✅</td></tr>
+        <tr><td><b>4244</b></td><td>TCP</td><td><b>Hubble 서버</b></td><td>✅</td><td>✅</td></tr>
+      </table>
+      <div class="callout tip" style="position:absolute;left:64px;right:64px;top:420px">
+        <div class="ico">i</div>
+        <div>여기 정의한 규칙은 <b>클러스터 정상 동작에 필요한 기본 규칙과 병합</b>됩니다 — 기본 규칙을 지우는 게 아니라 얹는 것입니다. <span class="mono">protocol</span> 만 필수이고 <span class="mono">source</span> 를 비우면 모든 출발지에 적용됩니다.</div>
+      </div>
+      <div class="callout warn" style="position:absolute;left:64px;right:64px;top:530px">
+        <div class="ico">!</div>
+        <div><b>4개를 한꺼번에 넣으세요.</b> <span class="mono">node</span> 변수 변경은 <b>머신 롤아웃을 유발</b>합니다. 나중에 Hubble 을 켜면서 4244 만 추가하려면 노드를 한 번 더 굴려야 합니다.</div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">12</div></div>
+    </section>
+
+    <!-- 13 · 13 Section-kubeproxy -->
+    <section class="slide l-section" data-screen-label="13 Section-kubeproxy">
+      <svg class="swoosh" style="right:0;top:0;left:auto" width="480" height="720" viewBox="0 0 480 720" fill="none">
+        <defs><linearGradient id="gPlum3" x1="480" y1="0" x2="0" y2="720" gradientUnits="userSpaceOnUse"><stop stop-color="#6C4B8F"/><stop offset="1" stop-color="#005B84"/></linearGradient></defs>
+        <path d="M480 0 V720 H120 C 300 640 360 520 360 360 C 360 200 300 80 200 0 Z" fill="url(#gPlum3)"/>
+        <path d="M186 0 C 288 84 346 202 346 360 C 346 522 286 644 100 720" stroke="#0193C2" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="sec-num">SECTION 03</div>
+      <h2>kube-proxy 없이<br>돌리기</h2>
+      <div class="sec-sub">클러스터를 만들 때 한 번만 정할 수 있는 값입니다. 고급 기능의 전제이기도 합니다.</div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">13</div></div>
+    </section>
+
+    <!-- 14 · 14 kube-proxy-free -->
+    <section class="slide l-content" data-screen-label="14 kube-proxy-free">
+      <div class="head"><h2>kube-proxy 비활성화 API</h2><div class="sub">VKS 3.7 · Cilium 의 eBPF 서비스 구현으로 kube-proxy 를 대체</div></div>
+      <div class="split">
+        <div class="codeblk">
+          <div class="codelabel">spec.topology.variables</div>
+          <div class="code"><span class="cmd">- name:</span> <span class="str">kubernetes</span>
+  <span class="arg">value:</span>
+    <span class="arg">kubeProxyConfiguration:</span>
+      <span class="arg">enabled:</span> <span class="str">false</span></div>
+          <div class="codelabel" style="margin-top:12px">스펙과 제약</div>
+          <div class="code"><span class="c"># 적용 범위   cluster 스코프만</span>
+<span class="c"># 변경 가능성 immutable</span>
+<span class="c"># 변경 영향   머신 롤아웃</span>
+<span class="c"># CNI 제약    Antrea · KR 내장 Calico 미지원</span>
+<span class="c">#             커스텀 CNI 는 KR 1.35 이상</span></div>
+        </div>
+        <ul class="lead">
+          <li><b>이 기능들은 kube-proxy 가 켜져 있으면 검증 오류</b>가 납니다 (Cilium 1.19.4)
+            <ul>
+              <li>L7 프록시 (Envoy 기반 L7 정책)</li>
+              <li>Ingress 컨트롤러 · Gateway API 컨트롤러</li>
+              <li>Egress Gateway (SNAT)</li>
+              <li>eBPF 마스커레이딩</li>
+            </ul>
+          </li>
+          <li>즉 「Cilium 의 좋은 기능을 쓰고 싶다」는 요구는 곧 <b>「클러스터를 만들 때 kube-proxy 를 끄고 시작해야 한다」</b>는 설계 결정입니다</li>
+        </ul>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">14</div></div>
+    </section>
+
+    <!-- 15 · 15 Big-설정값과동작 -->
+    <section class="slide l-big" data-screen-label="15 Big-설정값과동작">
+      <div class="eyebrow" style="position:absolute;left:90px;top:150px">KNOWN ISSUE · VKS 3.7</div>
+      <div class="statement">설정값이 아니라 <em>동작</em>을 재세요.<br>「비활성화로 표시되는데<br>계속 동작한다」</div>
+      <div style="position:absolute;left:90px;right:90px;top:492px;font-size:16px;line-height:1.6;color:#b9bdd0">
+        클러스터 <b style="color:#fff">생성 시</b> <span class="mono">kubernetes.kubeProxyConfiguration</span> 을 명시하지 않으면, 생성 후에 <span class="mono">enabled</span> 를 false 로 바꾸는 것이 허용됩니다. 그런데 실제 kube-proxy 는 계속 동작해서 <b style="color:#fff">상태 표시와 실제 동작이 어긋납니다.</b><br>
+        <b style="color:#fff">워크어라운드</b> — 활성/비활성은 반드시 <b style="color:#fff">클러스터 생성 시점에 명시</b>하고, 생성 후에는 바꾸지 마세요.
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">15</div></div>
+    </section>
+
+    <!-- 16 · 16 Cilium 알려진 문제 -->
+    <section class="slide l-data" data-screen-label="16 Cilium 알려진 문제">
+      <div class="head"><h2>Cilium 알려진 문제 · 비호환</h2><div class="sub">클러스터를 만들기 전에 답해야 하는 항목들</div></div>
+      <table style="top:176px">
+        <tr><th>증상</th><th>원인</th><th>대응</th></tr>
+        <tr><td><b>혼합 OS 클러스터가 Ready 안 됨</b></td><td>Cilium 이 Windows 를 지원하지 않아 Windows 워커가 Not Ready</td><td>Windows 워커가 필요하면 다른 CNI. Cilium 을 쓰려면 <b>Linux(Photon) 워커만</b></td></tr>
+        <tr><td><b>Istio 애드온 설치 실패</b></td><td>현 Cilium 애드온 버전의 제약으로 <b>Istio 애드온과 비호환</b></td><td>서비스 메시가 필수면 CNI 선택 재검토</td></tr>
+        <tr><td>kube-proxy 상태 불일치</td><td>생성 후 플래그 변경이 허용됨</td><td>생성 시점에 명시</td></tr>
+      </table>
+      <div class="callout warn" style="position:absolute;left:64px;right:64px;top:430px">
+        <div class="ico">!</div>
+        <div><b>워커 노드 보조 NIC 도 Windows 미지원</b>입니다. Cilium + Multus + Windows 를 한 클러스터에 넣으려는 설계는 <b>두 군데서 막힙니다</b>. Windows 워크로드가 있는 환경이라면 이 세 가지 조합 자체를 설계 초기에 걸러내세요.</div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">16</div></div>
+    </section>
+
+    <!-- 17 · 17 Section-Hubble -->
+    <section class="slide l-section" data-screen-label="17 Section-Hubble">
+      <svg class="swoosh" style="right:0;top:0;left:auto" width="480" height="720" viewBox="0 0 480 720" fill="none">
+        <defs><linearGradient id="gLeaf4" x1="480" y1="0" x2="0" y2="720" gradientUnits="userSpaceOnUse"><stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/></linearGradient></defs>
+        <path d="M480 0 V720 H120 C 300 640 360 520 360 360 C 360 200 300 80 200 0 Z" fill="url(#gLeaf4)"/>
+        <path d="M186 0 C 288 84 346 202 346 360 C 346 522 286 644 100 720" stroke="#0193C2" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="sec-num">SECTION 04</div>
+      <h2>Hubble 연동</h2>
+      <div class="sec-sub">eBPF 데이터플레인이 본 플로우를 그대로 올려 줍니다. 사이드카도 앱 수정도 없습니다.</div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">17</div></div>
+    </section>
+
+    <!-- 18 · 18 Hubble 3층 -->
+    <section class="slide l-data" data-screen-label="18 Hubble 3층">
+      <div class="head"><h2>Hubble 3층 구조</h2><div class="sub">「Cilium 을 깔면 Hubble 이 켜져 있다」는 절반만 맞습니다</div></div>
+      <table style="top:176px">
+        <tr><th>계층</th><th>범위</th><th>AddonConfig 값</th><th>기본값</th></tr>
+        <tr><td><b>Hubble UI</b> — 웹 대시보드·서비스 맵</td><td>클러스터 전체</td><td><span class="mono">hubble.ui.enabled</span></td><td><b>false</b> (Relay 필요)</td></tr>
+        <tr><td><b>Hubble Relay</b> — 플로우 집계</td><td>클러스터 전체</td><td><span class="mono">hubble.relay.enabled</span></td><td><b>false</b></td></tr>
+        <tr><td><b>Hubble Server</b> — cilium-agent 내장 · TCP 4244</td><td>노드 1대</td><td><span class="mono">hubble.enabled</span></td><td><b>true</b></td></tr>
+        <tr><td>서비스 노출 방식</td><td>UI</td><td><span class="mono">hubble.ui.service.type</span></td><td>ClusterIP</td></tr>
+      </table>
+      <div class="callout warn" style="position:absolute;left:64px;right:64px;top:440px">
+        <div class="ico">!</div>
+        <div><span class="mono">hubble.enabled</span> 가 기본 true 라 켜져 있다고 읽기 쉽지만, 그건 <b>노드 단위 서버</b>만 돌고 있다는 뜻입니다. 클러스터 전체를 한눈에 보는 경험(Relay · UI)은 <b>명시적으로 켜야</b> 생깁니다. 그리고 Relay 는 각 노드의 <b>TCP 4244</b> 로 붙습니다 — 워커에 이 포트가 안 열려 있으면 <b>Relay 는 Running 인데 그 노드 플로우만 조용히 빠집니다.</b></div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">18</div></div>
+    </section>
+
+    <!-- 19 · 19 Hubble 접근과 검증 -->
+    <section class="slide l-content" data-screen-label="19 Hubble 접근과 검증">
+      <div class="head"><h2>접근 · 검증</h2><div class="sub">Hubble 의 실전 가치는 대시보드 구경이 아니라 「왜 막혔는가」를 즉시 답하는 것</div></div>
+      <div class="split">
+        <div class="codeblk">
+          <div class="codelabel">UI · CLI 접근</div>
+          <div class="code"><span class="c"># UI (ClusterIP 기본)</span>
+<span class="pr">$</span> <span class="cmd">kubectl</span> port-forward <span class="arg">-n</span> kube-system svc/hubble-ui <span class="str">12000:80</span>
+
+<span class="c"># Relay 에 붙어 플로우 보기</span>
+<span class="pr">$</span> <span class="cmd">kubectl</span> port-forward <span class="arg">-n</span> kube-system svc/hubble-relay <span class="str">4245:80</span>
+<span class="pr">$</span> <span class="cmd">hubble</span> observe <span class="arg">--server</span> localhost:4245 <span class="arg">-f</span>
+
+<span class="c"># 정책 때문에 막힌 트래픽만</span>
+<span class="pr">$</span> <span class="cmd">hubble</span> observe <span class="arg">--verdict</span> <span class="str">DROPPED</span> <span class="arg">--type</span> <span class="str">policy-verdict</span></div>
+          <div class="codelabel" style="margin-top:12px">검증 — 노드 수를 대조</div>
+          <div class="code"><span class="pr">$</span> <span class="cmd">hubble</span> status <span class="arg">--server</span> localhost:4245
+<span class="c"># 연결된 노드 수 == 실제 노드 수 인가?</span></div>
+        </div>
+        <ul class="lead">
+          <li><b>파드가 Running 인 것은 「떴다」이지 「보고 있다」가 아닙니다.</b> 4244 가 일부 노드풀에만 열려 있으면 Relay 는 정상 기동한 채로 그 노드들의 플로우를 빠뜨립니다 — 에러로 안 나타납니다</li>
+          <li><b>Hubble UI 에는 인증이 없습니다.</b> LoadBalancer 로 열면 네트워크에 닿는 누구나 클러스터 전체 통신 그래프를 봅니다</li>
+          <li><b>보조 NIC 에는 LoadBalancer 를 못 붙입니다</b> — Service type LoadBalancer 는 항상 primary 에 생깁니다</li>
+          <li>Hubble 은 기본적으로 <b>링 버퍼</b> — 장기 보관 도구가 아닙니다. 과거 사건 조사는 메트릭·로그로 따로 내보내세요</li>
+        </ul>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">19</div></div>
+    </section>
+
+    <!-- 20 · 20 Section-노드NIC -->
+    <section class="slide l-section" data-screen-label="20 Section-노드NIC">
+      <svg class="swoosh" style="right:0;top:0;left:auto" width="480" height="720" viewBox="0 0 480 720" fill="none">
+        <defs><linearGradient id="gAqua5" x1="480" y1="0" x2="0" y2="720" gradientUnits="userSpaceOnUse"><stop stop-color="#0193C2"/><stop offset="1" stop-color="#005B84"/></linearGradient></defs>
+        <path d="M480 0 V720 H120 C 300 640 360 520 360 360 C 360 200 300 80 200 0 Z" fill="url(#gAqua5)"/>
+        <path d="M186 0 C 288 84 346 202 346 360 C 346 522 286 644 100 720" stroke="#0193C2" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="sec-num">SECTION 05</div>
+      <h2>노드 보조 NIC</h2>
+      <div class="sec-sub">파드에 NIC 를 붙이기 전에, 노드에 케이블을 까는 단계입니다. CNI 와 무관합니다.</div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">20</div></div>
+    </section>
+
+    <!-- 21 · 21 networks 변수 -->
+    <section class="slide l-content" data-screen-label="21 networks 변수">
+      <div class="head"><h2>networks 변수 · 인프라 준비</h2><div class="sub">NSX VPC 는 Subnet/SubnetSet, VDS 는 Network — API 그룹만 다르고 패턴은 같습니다</div></div>
+      <div class="split">
+        <div class="codeblk">
+          <div class="codelabel">① NSX VPC · Subnet (클러스터 생성 전)</div>
+          <div class="code"><span class="cmd">kind:</span> <span class="str">Subnet</span>   <span class="c"># crd.nsx.vmware.com/v1alpha1</span>
+<span class="cmd">spec:</span>
+  <span class="arg">accessMode:</span> <span class="str">Private</span>
+  <span class="arg">subnetDHCPConfig:</span>
+    <span class="arg">mode:</span> <span class="str">DHCPDeactivated</span>      <span class="c"># 필수</span>
+  <span class="arg">advancedConfig:</span>
+    <span class="arg">staticIPAllocation:</span>
+      <span class="arg">enabled:</span> <span class="str">false</span>          <span class="c"># 필수 · IP 고갈 방지</span></div>
+          <div class="codelabel" style="margin-top:10px">② Cluster · spec.topology.variables</div>
+          <div class="code"><span class="cmd">- name:</span> <span class="str">networks</span>
+  <span class="arg">value:</span>
+    <span class="arg">interfaces:</span>
+      <span class="arg">secondary:</span>        <span class="c"># primary 생략이 기본</span>
+        - <span class="arg">name:</span> <span class="str">eth1</span>              <span class="c"># eth0 불가 · mtu 9000 = 점보</span>
+          <span class="arg">network:</span>
+            <span class="arg">apiVersion:</span> <span class="str">crd.nsx.vmware.com/v1alpha1</span>
+            <span class="arg">kind:</span> <span class="str">Subnet</span>
+            <span class="arg">name:</span> <span class="str">secondary-node-net</span></div>
+        </div>
+        <ul class="lead">
+          <li><b>staticIPAllocation: false 는 권고가 아니라 필수</b>입니다. 켜져 있으면 노드가 프로비저닝될 때마다 정적 IP 를 소비하는데 <b>롤링 업데이트에서 반환되지 않아</b> 서브넷이 고갈됩니다</li>
+          <li><b>VDS 는 포트그룹 3종을 모두</b> — trunk 모드 · Forged Transmits · MAC Learning. <b>둘만 맞춰도 노드는 정상으로 뜨고</b>, 고장은 나중에 파드 보조 NIC 통신 불가로 나타납니다. 이걸 가리키는 이벤트나 에러가 없어 디버깅이 가장 긴 지점입니다</li>
+          <li><b>primary 는 영구</b>입니다 — 생성 후 변경 불가. <span class="mono">SubnetSet</span> 만 참조 가능하고, 대부분의 배포는 <b>생략이 정답</b>입니다</li>
+          <li>eth1 에 목적을 주려면 <span class="mono">routes</span>(<span class="mono">to</span> / <span class="mono">via</span>) 를 추가합니다 — <b>CloudInit 부트스트랩 전용 · IPv4만</b></li>
+          <li>기존 클러스터에 <b>추가는 가능</b>합니다 — 롤링 노드 업데이트로 적용</li>
+        </ul>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">21</div></div>
+    </section>
+
+    <!-- 22 · 22 Section-Multus -->
+    <section class="slide l-section" data-screen-label="22 Section-Multus">
+      <svg class="swoosh" style="right:0;top:0;left:auto" width="480" height="720" viewBox="0 0 480 720" fill="none">
+        <defs><linearGradient id="gPlum6" x1="480" y1="0" x2="0" y2="720" gradientUnits="userSpaceOnUse"><stop stop-color="#6C4B8F"/><stop offset="1" stop-color="#005B84"/></linearGradient></defs>
+        <path d="M480 0 V720 H120 C 300 640 360 520 360 360 C 360 200 300 80 200 0 Z" fill="url(#gPlum6)"/>
+        <path d="M186 0 C 288 84 346 202 346 360 C 346 522 286 644 100 720" stroke="#0193C2" stroke-width="3" fill="none"/>
+      </svg>
+      <div class="sec-num">SECTION 06</div>
+      <h2>Multus<br>멀티 NIC 파드</h2>
+      <div class="sec-sub">노드에 깐 케이블에 파드를 꽂는 단계입니다. VKS 3.7 · Product 티어.</div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">22</div></div>
+    </section>
+
+    <!-- 23 · 23 Multus NAD -->
+    <section class="slide l-content" data-screen-label="23 Multus NAD">
+      <div class="head"><h2>Multus · Whereabouts</h2><div class="sub">Multus 4.2.4 + Whereabouts 0.9.3 · <b>Product 티어</b>(런타임까지 Broadcom 완전 지원) · v3.7.0+20260618</div></div>
+      <div class="split">
+        <div class="codeblk">
+          <div class="codelabel">NetworkAttachmentDefinition</div>
+          <div class="code"><span class="cmd">apiVersion:</span> <span class="str">k8s.cni.cncf.io/v1</span>
+<span class="cmd">kind:</span> <span class="str">NetworkAttachmentDefinition</span>
+<span class="cmd">metadata:</span>
+  <span class="arg">name:</span> <span class="str">macvlan-conf</span>
+<span class="cmd">spec:</span>
+  <span class="arg">config:</span> <span class="str">'{</span>
+    <span class="str">"type": "macvlan",</span>
+    <span class="str">"master": "eth1",</span>        <span class="c">← 노드 보조 NIC</span>
+    <span class="str">"mode": "bridge",</span>
+    <span class="str">"ipam": {</span>
+      <span class="str">"type": "whereabouts",</span>  <span class="c">← 클러스터 범위 IPAM</span>
+      <span class="str">"range": "192.168.100.0/24"</span>
+    <span class="str">} }'</span></div>
+          <div class="codelabel" style="margin-top:10px">파드에 붙이기</div>
+          <div class="code"><span class="cmd">metadata:</span>
+  <span class="arg">annotations:</span>
+    <span class="arg">k8s.v1.cni.cncf.io/networks:</span> <span class="str">macvlan-conf</span>
+<span class="c"># 결과: lo · eth0(주 CNI) · net1(보조)</span></div>
+        </div>
+        <ul class="lead">
+          <li><b>master: eth1 에서 두 층이 만납니다.</b> 노드의 <span class="mono">eth1</span> 과 파드의 <span class="mono">net1</span> 은 <b>다른 것</b>입니다 — 문서·코드에 층을 명시하세요</li>
+          <li><b>IPAM 은 Whereabouts</b> 를 쓰세요. <span class="mono">host-local</span> 은 노드별로 독립이라 여러 노드에 걸치면 <b>IP 충돌</b>이 납니다</li>
+          <li>대상은 <b>VPC 모드 Calico CNI 클러스터</b>. VKr 1.36 미만 + Calico 는 클러스터 생성 전에 <b>autodetect 인터페이스를 eth0 으로 고정</b>하는 사전 구성이 필요합니다 — 노드에 NIC 가 여러 개 생기는 순간 Calico 가 엉뚱한 NIC 를 고를 수 있습니다</li>
+          <li>네이티브 대안 : <b>Antrea SecondaryNetwork + AntreaIPAM</b> (VKS 3.6)</li>
+        </ul>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">23</div></div>
+    </section>
+
+    <!-- 24 · 24 SR-IOV vfio-pci -->
+    <section class="slide l-content" data-screen-label="24 SR-IOV vfio-pci">
+      <div class="head"><h2>SR-IOV · DPDK — vfio-pci 바인딩</h2><div class="sub">VKS 3.7 · Telco 5G Core CNF 등 DPDK 가속 워크로드</div></div>
+      <div class="split">
+        <div class="codeblk">
+          <div class="codelabel">networks.interfaces.secondary</div>
+          <div class="code">- <span class="arg">name:</span> <span class="str">eth1</span>
+  <span class="arg">network:</span>
+    <span class="arg">apiVersion:</span> <span class="str">netoperator.vmware.com/v1alpha1</span>
+    <span class="arg">kind:</span> <span class="str">Network</span>
+    <span class="arg">name:</span> <span class="str">sriov-portgroup</span>
+  <span class="arg">driver:</span> <span class="str">vfio-pci</span>          <span class="c"># 현재 유일한 값</span>
+  <span class="arg">sriovResourcePool:</span>
+    <span class="arg">prefix:</span> <span class="str">intel.com</span>
+    <span class="arg">name:</span> <span class="str">sriov_netdevice</span></div>
+          <div class="codelabel" style="margin-top:12px">파드는 표준 리소스 요청으로 가져감</div>
+          <div class="code"><span class="cmd">resources:</span>
+  <span class="arg">requests:</span>
+    <span class="arg">intel.com/sriov_netdevice:</span> <span class="str">"1"</span></div>
+        </div>
+        <ul class="lead">
+          <li><span class="mono">driver</span> 를 지정하면 <span class="mono">sriovResourcePool</span> 을 <b>함께</b> 설정해야 하고, <span class="mono">name</span>·<span class="mono">prefix</span> 둘 다 필수입니다</li>
+          <li><b>SR-IOV VLAN 태깅은 VDS 전용</b> — NSX VPC 는 아직 미지원</li>
+          <li>관련 애드온 : SR-IOV Plugin 3.11.0</li>
+        </ul>
+      </div>
+      <div class="callout warn" style="position:absolute;left:64px;right:64px;bottom:76px">
+        <div class="ico">!</div>
+        <div><b>vIOMMU 경고 — 보안에 직결됩니다.</b> 노드 VM 에 vIOMMU 가 활성화돼 있지 않으면 머신 에이전트가 <b>VFIO unsafe no-IOMMU 모드를 자동으로 켭니다</b>. 이 경우 디바이스의 <b>DMA 가 IOMMU 로 보호되지 않습니다</b>. 자동 폴백이 경고 없이 격리 보장을 낮추는 자리이므로, <b>프로덕션에서는 vIOMMU 를 켜고</b> 인수인계 문서에 그 상태를 명시하세요.</div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">24</div></div>
+    </section>
+
+    <!-- 25 · 25 제약과 스케일 -->
+    <section class="slide l-data" data-screen-label="25 제약과 스케일">
+      <div class="head"><h2>현재 못 하는 것 · 스케일 조정</h2><div class="sub">설계 전에 반드시 읽을 것</div></div>
+      <div class="metrics">
+        <div class="metric aqua"><div class="big">250</div><div class="label">워커 노드 상한 (3.7)</div><div class="desc">기존 150 → 250. 단, 아래 조정이 전제</div></div>
+        <div class="metric leaf"><div class="big">6 vCPU</div><div class="label">CP VM 클래스 (Calico+Multus+AVI)</div><div class="desc">Antrea+AVI 는 4 vCPU / 12 GiB</div></div>
+        <div class="metric plum"><div class="big">1.5 Gi</div><div class="label">Multus 메모리 제한</div><div class="desc">안 올리면 OOMKilled</div></div>
+      </div>
+      <table>
+        <tr><th>제약</th><th>의미</th></tr>
+        <tr><td><b>보조 네트워크에 LoadBalancer 불가</b></td><td>Service type LoadBalancer 는 <b>항상 primary</b> 에 생성됩니다</td></tr>
+        <tr><td><b>보조 인터페이스에 NetworkPolicy 미적용</b></td><td>eth1 이상의 트래픽은 <b>K8s 정책 계층에서 필터링되지 않습니다</b></td></tr>
+        <tr><td><b>NSX-T T1 미지원</b> · <b>Windows 노드 풀 불가</b></td><td>지원 백엔드는 NSX VPC 와 VDS. etcd DB 는 4 GB 이상, Pod CIDR 은 /15~/14</td></tr>
+      </table>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">25</div></div>
+    </section>
+
+    <!-- 26 · 26 체크리스트 -->
+    <section class="slide l-two" data-screen-label="26 체크리스트">
+      <div class="head"><h2>클러스터를 만들기 전에 답할 것</h2><div class="sub">생성 후에는 못 바꾸거나 롤아웃을 유발하는 항목들</div></div>
+      <div class="cols">
+        <div class="card aqua">
+          <div class="card-tag">Cilium · Hubble</div>
+          <ul>
+            <li><b>Ecosystem 티어</b>의 지원 범위를 수용했는가</li>
+            <li>VKS 3.6+ / VKr 1.35+ · 애드온 저장소 설치됐는가</li>
+            <li><b>kube-proxy 를 끌 것인가</b> — immutable, 생성 시점 결정</li>
+            <li>방화벽 <b>4개 포트</b>를 CP·워커에 각각 넣었는가</li>
+            <li><b>ownerReference / owned-for-deletion</b> 을 걸었는가</li>
+            <li>Windows 워커 · Istio 애드온이 필요한가 (필요 시 Cilium 불가)</li>
+            <li><span class="mono">hubble status</span> 의 연결 노드 수 = 실제 노드 수 인가</li>
+          </ul>
+        </div>
+        <div class="card plum">
+          <div class="card-tag">멀티 NIC</div>
+          <ul>
+            <li>NSX VPC : <span class="mono">DHCPDeactivated</span> + <span class="mono">staticIPAllocation: false</span></li>
+            <li>VDS : 포트그룹 <b>3종 모두</b> (trunk·Forged·MAC Learning)</li>
+            <li><b>primary 는 생략</b>해도 되는가 (대부분 정답)</li>
+            <li><b>제거 불가를 전제로</b> 설계했는가 — 3.6/3.7 서술이 엇갈리는 미결 항목</li>
+            <li>Multus 면 <b>3.7 + VPC 모드 Calico</b> 인가</li>
+            <li>IPAM 이 <b>Whereabouts</b> 인가</li>
+            <li>SR-IOV 면 노드 VM 에 <b>vIOMMU</b> 가 켜져 있는가</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">26</div></div>
+    </section>
+
+    <!-- 27 · 27 Thanks -->
+    <section class="slide l-thanks" data-screen-label="27 Thanks">
+      <svg class="swoosh" style="left:0;top:0" width="560" height="720" viewBox="0 0 560 720" fill="none">
+        <defs>
+          <linearGradient id="gThanksLeaf" x1="0" y1="720" x2="560" y2="0" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#61A00A"/><stop offset="1" stop-color="#007A86"/>
+          </linearGradient>
+        </defs>
+        <path d="M0 0 H560 C 380 60 300 180 300 380 C 300 560 220 680 0 720 Z" fill="url(#gThanksLeaf)"/>
+        <path d="M560 14 C 388 76 316 192 316 380 C 316 556 240 672 40 720" stroke="#0193C2" stroke-width="3" fill="none"/>
+      </svg>
+      <h2>감사합니다</h2>
+      <div class="contact" style="left:560px;width:620px">
+        <b>텍스트 companion 문서</b><br>
+        VKS_Cilium_CNI_KR.md — 설치 4단계 · 애드온 라이프사이클<br>
+        VKS_Cilium_Hubble_KR.md — Relay/UI · 메트릭 · 검증<br>
+        VKS_Multus_MultiNIC_KR.md — 노드 NIC · NAD · SR-IOV<br><br>
+        <b>라이브</b> · <a href="https://kjin17.github.io/vks-study/">kjin17.github.io/vks-study</a><br><br>
+        <b>출처</b> · Broadcom TechDocs (Cilium CNI Add-On Package, Managing Add-ons in VKS Clusters,
+        ClusterClass Variable Reference, Configure Multiple Networks for VKS Clusters),
+        VKS 3.6 / 3.7 Release Notes, VKS Standard Packages Release Notes<br><br>
+        공개 문서 기반 학습용 정리입니다. 실제 배포 전에는 해당 릴리스의 공식 문서를 다시 확인하세요.
+      </div>
+      <div class="footer"><div class="brand-mark">VMware <span>by Broadcom</span></div><div class="page-no">27</div></div>
+    </section>
+
+  </div>
+</div>
+
+<nav class="nav">
+  <button id="prev" aria-label="Previous">‹</button>
+  <div class="dots" id="dots"></div>
+  <button id="next" aria-label="Next">›</button>
+</nav>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dotsBox = document.getElementById('dots');
+  var KEY = 'vks-advanced-networking-pos';
+  var idx = 0;
+  var saved = parseInt(localStorage.getItem(KEY), 10);
+  if (!isNaN(saved) && saved >= 0 && saved < slides.length) idx = saved;
+
+  slides.forEach(function (_, i) {
+    var d = document.createElement('div');
+    d.className = 'dot' + (i === idx ? ' on' : '');
+    d.addEventListener('click', function () { go(i); });
+    dotsBox.appendChild(d);
+  });
+  var dots = Array.prototype.slice.call(dotsBox.children);
+
+  function go(i) {
+    idx = (i + slides.length) % slides.length;
+    slides.forEach(function (s, k) { s.classList.toggle('active', k === idx); });
+    dots.forEach(function (d, k) { d.classList.toggle('on', k === idx); });
+    try { localStorage.setItem(KEY, idx); } catch (e) {}
+  }
+  go(idx);
+  document.getElementById('prev').addEventListener('click', function () { go(idx - 1); });
+  document.getElementById('next').addEventListener('click', function () { go(idx + 1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') go(idx - 1);
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(idx + 1); }
+  });
+
+  function fit() {
+    var deck = document.getElementById('deck');
+    var de = document.documentElement;
+    var w = de.clientWidth || window.innerWidth;
+    var h = de.clientHeight || window.innerHeight;
+    var s = Math.min(w / 1280, h / 720) * 0.96;
+    deck.style.transform = 'scale(' + s + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+})();
+</script>
+</body>
+</html>
