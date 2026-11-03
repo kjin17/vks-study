@@ -43,8 +43,11 @@ VKS의 전략적 기본 CNI는 여전히 **Antrea**입니다. Calico가 함께 �
 |---|---|---|
 | v3.6.0+20260320 | **1.19.1** 🆕 | VKS 대안 CNI로 공식 합류. eBPF 데이터플레인, Hubble UI/Relay, K8s NetworkPolicy(L3/L4) + CiliumNetworkPolicy(L7) |
 | v3.7.0+20260618 | **1.19.4** | L7 프록시(Envoy), Ingress 컨트롤러, Egress Gateway(SNAT), Gateway API 컨트롤러, eBPF 마스커레이딩, XDP 로드밸런서 가속, 정책 시행 모드 제어, Prometheus 메트릭(agent/operator), Hubble 플로우 메트릭 |
+| v3.7.0+20260723 | **1.19.5** (`1.19.5+vmware.2-vks.1`) | 패치 갱신 |
+| v3.7.0+20260827 · 20260924 | **1.20.0** (`1.20.0+vmware.1-vks.1`) | 1.20 계열로 올라감 |
+| v3.8.0+20261021 | **1.20.1** (`1.20.1+vmware.1-vks.1`) | Go 의존성·기반 이미지 취약점 갱신, Go Native FIPS 빌드. 1.19.x 에서 바로 업그레이드. 지원 VKr 표의 분류는 **Ecosystem** |
 
-> 🔄 **업스트림과의 간격 (2026-11-03 확인, GitHub cilium/cilium releases):** 업스트림 최신 패치는 **1.19.10**(2026-10-23), 안정 최신 계열은 **1.20.4**, 다음 계열 **1.21.0-pre.4**(2026-11-02, BPF 마스커레이딩 기본 활성화 예정)입니다. VKS 3.8에 묶인 Cilium 애드온 버전은 이번에 공식 문서에서 확인하지 못했습니다 ❓ — 3.7의 1.19.4 기준이면 업스트림 패치보다 6단계 뒤입니다(추론).
+> 🔄 **업스트림과의 간격 (2026-11-03 확인, GitHub cilium/cilium releases):** 업스트림 최신 패치는 **1.19.10**(2026-10-23), 안정 최신 계열은 **1.20.4**, 다음 계열 **1.21.0-pre.4**(2026-11-02, BPF 마스커레이딩 기본 활성화 예정)입니다. VKS 3.8 애드온(v3.8.0+20261021)의 Cilium 은 **1.20.1+vmware.1-vks.1** 로, 업스트림 1.20.4 보다 3패치 뒤입니다 (9.1 VKS Add-ons Release Notes, Last Updated 2026-10-26).
 
 ### 전제 조건 🅑
 
@@ -342,11 +345,12 @@ kubectl -n kube-system exec ds/cilium -- cilium-dbg status | grep -i kubeproxy
 | 증상 | 원인 | 대응 |
 |---|---|---|
 | **혼합 OS 클러스터가 Ready 안 됨** | Cilium이 **Windows를 지원하지 않아** Windows 워커가 Not Ready로 남음 | Windows 워커가 필요하면 다른 CNI를 쓰고, Cilium을 써야 하면 **Linux(Photon OS) 워커로만** 구성 |
-| **Istio 애드온 설치 실패** | 현재 Cilium 애드온 버전의 제약으로 **Istio 애드온과 Cilium CNI가 비호환** | 서비스 메시가 필수면 CNI 선택을 다시 검토. Cilium 자체의 L7 프록시·Gateway API 컨트롤러가 일부를 대체할 수 있으나 동등물은 아님 |
+| **Istio 애드온 설치 실패** | 현재 Cilium 애드온 버전의 제약으로 **Istio 애드온과 Cilium CNI가 비호환** (v3.6.0+20260320 알려진 문제) | 서비스 메시가 필수면 CNI 선택을 다시 검토. Cilium 자체의 L7 프록시·Gateway API 컨트롤러가 일부를 대체할 수 있으나 동등물은 아님 |
+| **Cilium operator CrashLoopBackOff** (VKr 1.36) | kube-proxy 를 끈 VKS 3.7.0+·Cilium 1.19.4+ 클러스터에서 `gatewayAPI.enabled: true` 를 켜면, VKr 1.36 이 넣는 Gateway API v1.5.1 과 Cilium 1.19.4+ 가 맞지 않음 (v3.7.0+20260723 알려진 문제) | VKr 1.36+ 에서 이 기능을 쓰려면 [Broadcom 우회 절차](https://techdocs.broadcom.com/us/en/vmware-cis/vcf/vcf-consumption/latest/managing-vsphere-kuberenetes-service-clusters-and-workloads/provisioning-tkg-service-clusters/create-a--cluster-using-the-cilium-cni-addon-package-for-vks/cilium-37.html)를 따름 |
 | kube-proxy 상태 불일치 | 생성 후 플래그 변경 허용 | 생성 시점에 명시 (5절 참조) |
 | 업그레이드 중 멈춤 (VKS 3.7 이하) | 이전 VKr에서 남은 Antrea/Calico 고아 `AddonRelease`가 같은 버전으로 겹쳐 잘못된 쪽이 선택됨 | **VKS 3.8.0에서 수정** 🅑 (2026-11-03 확인). CNI를 바꿔 온 클러스터라면 3.8 이전엔 고아 리소스부터 확인 |
 
-> 🔄 **2026-11-03 재확인 (VKS 3.8 Release Notes):** 혼합 OS(Windows 워커) + Cilium 비호환은 3.8 알려진 문제에 **그대로 남아 있습니다.** Istio 비호환은 3.8 VKS 릴리스 노트 본문에서 찾지 못했습니다(애드온 릴리스 노트 쪽 확인 전까지 ❓ 미결로 둡니다).
+> 🔄 **2026-11-03 재확인 (VKS 3.8 Release Notes):** 혼합 OS(Windows 워커) + Cilium 비호환은 3.8 알려진 문제에 **그대로 남아 있습니다.** Istio 비호환은 VKS Add-ons 릴리스 노트의 **v3.6.0+20260320 알려진 문제에만** 있고, 3.7.x·3.8 알려진 문제·해결 목록 어디에도 없습니다. 해결 공지도 없으므로 실제 설치로 확인하기 전까지는 비호환으로 가정합니다(추론).
 
 > ⚠️ **워커 노드 보조 NIC도 Windows 미지원**입니다. Cilium + Multus + Windows를 한 클러스터에 넣으려는 설계는 두 군데서 막힙니다.
 
