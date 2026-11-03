@@ -44,6 +44,8 @@ VKS의 전략적 기본 CNI는 여전히 **Antrea**입니다. Calico가 함께 �
 | v3.6.0+20260320 | **1.19.1** 🆕 | VKS 대안 CNI로 공식 합류. eBPF 데이터플레인, Hubble UI/Relay, K8s NetworkPolicy(L3/L4) + CiliumNetworkPolicy(L7) |
 | v3.7.0+20260618 | **1.19.4** | L7 프록시(Envoy), Ingress 컨트롤러, Egress Gateway(SNAT), Gateway API 컨트롤러, eBPF 마스커레이딩, XDP 로드밸런서 가속, 정책 시행 모드 제어, Prometheus 메트릭(agent/operator), Hubble 플로우 메트릭 |
 
+> 🔄 **업스트림과의 간격 (2026-11-03 확인, GitHub cilium/cilium releases):** 업스트림 최신 패치는 **1.19.10**(2026-10-23), 안정 최신 계열은 **1.20.4**, 다음 계열 **1.21.0-pre.4**(2026-11-02, BPF 마스커레이딩 기본 활성화 예정)입니다. VKS 3.8에 묶인 Cilium 애드온 버전은 이번에 공식 문서에서 확인하지 못했습니다 ❓ — 3.7의 1.19.4 기준이면 업스트림 패치보다 6단계 뒤입니다(추론).
+
 ### 전제 조건 🅑
 
 - VKS **3.6 이상**, VKr **1.35 이상**
@@ -188,6 +190,8 @@ metadata:
 - 이 변수는 **초기 부트스트랩 단계**에 쓰입니다. 즉 클러스터를 만들기 전에 YAML에 들어 있어야 합니다 🅑
 
 > 📌 **구형 방식은 폐기됐습니다.** `ClusterBootstrap`의 `cni` 필드와 `AntreaConfig`/`CalicoConfig`는 VKr 1.35+에서 `bootstrapAddons` + `AddonConfig`로 대체되며 자동 마이그레이션됩니다. 예전 블로그·문서를 따라가다 여기서 막히는 경우가 많습니다. 🅑
+>
+> 🆕 **VKS 3.8 (2026-11-03 확인, VKS 3.8 Release Notes):** VKr **1.37 이상**에서는 `ClusterBootstrap`·`ClusterBootstrapTemplate`·`KappControllerConfig`·`VSphereCSIConfig`·`VSphereCPIConfig` 가 **무시되고, `ClusterBootstrap` 생성 자체가 막힙니다.** 코어 애드온(CNI 포함)의 사용자 설정은 스키마 검증되는 `AddonConfig`(`addons.kubernetes.vmware.com/v1alpha1`)로만 합니다. vCenter UI의 Supervisor → Configure → **Default CNI** 메뉴도 9.x vCenter에서 사라집니다. 🅑
 
 ### Step 4. 방화벽 규칙 — 4개 포트
 
@@ -340,6 +344,9 @@ kubectl -n kube-system exec ds/cilium -- cilium-dbg status | grep -i kubeproxy
 | **혼합 OS 클러스터가 Ready 안 됨** | Cilium이 **Windows를 지원하지 않아** Windows 워커가 Not Ready로 남음 | Windows 워커가 필요하면 다른 CNI를 쓰고, Cilium을 써야 하면 **Linux(Photon OS) 워커로만** 구성 |
 | **Istio 애드온 설치 실패** | 현재 Cilium 애드온 버전의 제약으로 **Istio 애드온과 Cilium CNI가 비호환** | 서비스 메시가 필수면 CNI 선택을 다시 검토. Cilium 자체의 L7 프록시·Gateway API 컨트롤러가 일부를 대체할 수 있으나 동등물은 아님 |
 | kube-proxy 상태 불일치 | 생성 후 플래그 변경 허용 | 생성 시점에 명시 (5절 참조) |
+| 업그레이드 중 멈춤 (VKS 3.7 이하) | 이전 VKr에서 남은 Antrea/Calico 고아 `AddonRelease`가 같은 버전으로 겹쳐 잘못된 쪽이 선택됨 | **VKS 3.8.0에서 수정** 🅑 (2026-11-03 확인). CNI를 바꿔 온 클러스터라면 3.8 이전엔 고아 리소스부터 확인 |
+
+> 🔄 **2026-11-03 재확인 (VKS 3.8 Release Notes):** 혼합 OS(Windows 워커) + Cilium 비호환은 3.8 알려진 문제에 **그대로 남아 있습니다.** Istio 비호환은 3.8 VKS 릴리스 노트 본문에서 찾지 못했습니다(애드온 릴리스 노트 쪽 확인 전까지 ❓ 미결로 둡니다).
 
 > ⚠️ **워커 노드 보조 NIC도 Windows 미지원**입니다. Cilium + Multus + Windows를 한 클러스터에 넣으려는 설계는 두 군데서 막힙니다.
 
